@@ -21,7 +21,7 @@ html,body{height:100%;margin:0;font-family:"Avenir Next","Trebuchet MS",system-u
 #adminBtn:focus-visible,.b:focus-visible,.fab:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 #fabs{position:fixed;right:12px;bottom:calc(var(--sab) + 34px);z-index:900;display:flex;flex-direction:column;gap:10px}
 .fab{width:46px;height:46px;border-radius:50%;border:none;background:var(--bg);color:var(--fg);font-size:20px;cursor:pointer;box-shadow:var(--shadow)}
-#status{position:fixed;left:12px;bottom:calc(var(--sab) + 34px);z-index:900;background:var(--bg);border-radius:999px;padding:9px 15px;font-size:13px;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px;max-width:calc(100% - 90px)}
+#status{position:fixed;left:10px;right:10px;top:calc(var(--sat, env(safe-area-inset-top,0px)) + 8px);z-index:900;background:var(--bg);color:var(--fg);border:2px solid transparent;border-radius:14px;padding:11px 14px;font-size:14px;font-weight:600;line-height:1.3;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px}
 #status i{width:9px;height:9px;border-radius:50%;background:#2563eb;flex:none}
 #panel{position:fixed;left:8px;right:8px;bottom:calc(var(--sab) + 8px);z-index:1001;background:var(--bg);border-radius:20px;padding:16px 18px;box-shadow:var(--shadow);display:none;max-height:62%;overflow:auto;max-width:520px;margin:0 auto}
 #panel h2{margin:0 0 6px;font-size:18px}
@@ -43,7 +43,7 @@ input[type=range]{accent-color:var(--zone);width:100%}
 
 html,body{height:100dvh;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
 button{touch-action:manipulation}
-#top{position:fixed;top:calc(var(--sat) + 12px);right:12px;z-index:1000;display:flex;gap:8px}
+#top{position:fixed;top:calc(var(--sat) + 64px);right:12px;z-index:1000;display:flex;gap:8px}
 #adminBtn{position:static;height:42px;padding:0 18px}
 #helpBtn{width:42px;height:42px;border-radius:50%;border:none;background:var(--bg);color:var(--fg);font:700 18px inherit;cursor:pointer;box-shadow:var(--shadow)}
 #panel{max-height:58dvh}
@@ -69,15 +69,21 @@ input[type=range]{height:34px}
 .sw.green{border-radius:8px;border:4px solid var(--zone)}
 .sw.grey{border-radius:8px;background:#7d838c}
 #pin{width:100%;font-size:24px;letter-spacing:.15em;text-align:center;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:transparent;color:var(--fg)}
-#toast{position:fixed;left:50%;top:calc(var(--sat) + 66px);transform:translateX(-50%);z-index:3000;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90%;text-align:center}
+#toast{position:fixed;left:10px;right:10px;top:calc(var(--sat, env(safe-area-inset-top,0px)) + 8px);z-index:5000;background:var(--fg);color:var(--bg);padding:14px 16px;border-radius:14px;font-size:15px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s;text-align:center;box-shadow:var(--shadow)}
 #toast.show{opacity:1}
 @media (min-width:700px){.veil{align-items:center}}
 .chandle{background:#e03131;color:#fff;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;font-size:20px;border:3px solid #fff;box-shadow:var(--shadow)}
 .chk{display:flex;align-items:center;gap:10px;margin:8px 0 0;font-size:14px;min-height:38px}
 .chk input{width:22px;height:22px;accent-color:var(--zone)}
-#timer{position:fixed;top:calc(var(--sat) + 12px);left:50%;transform:translateX(-50%);z-index:900;background:var(--fg);color:var(--bg);border-radius:999px;padding:0 16px;height:42px;display:flex;align-items:center;font:700 17px inherit;font-variant-numeric:tabular-nums;box-shadow:var(--shadow)}
+#timer{position:fixed;top:calc(var(--sat) + 64px);left:50%;transform:translateX(-50%);z-index:900;background:var(--fg);color:var(--bg);border-radius:999px;padding:0 16px;height:42px;display:flex;align-items:center;font:700 17px inherit;font-variant-numeric:tabular-nums;box-shadow:var(--shadow)}
 #timer[hidden]{display:none}
-.hider{width:40px;height:40px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-size:22px;border:3px solid #c2410c;box-shadow:var(--shadow)}
+.hider{width:24px;height:24px;border-radius:50%;background:#facc15;border:3px solid #fff;box-shadow:0 0 0 0 rgba(250,204,21,.7);animation:pulseY 2s infinite}
+@keyframes pulseY{70%{box-shadow:0 0 0 18px rgba(250,204,21,0)}100%{box-shadow:0 0 0 0 rgba(250,204,21,0)}}
+.dotY{display:inline-block;width:10px;height:10px;border-radius:50%;background:#facc15;margin-left:7px;border:1.5px solid var(--bg);vertical-align:middle}
+.hb{display:flex;gap:6px}
+.main2{background:var(--zone);border-color:var(--zone);color:#fff}
+#okQuick{display:none}
+#panel.fold #okQuick{display:inline-block}
 details.bonus{border:1.5px solid var(--line);border-radius:14px;padding:4px 14px;margin:14px 0 0}
 details.bonus summary{font-weight:700;min-height:42px;display:flex;align-items:center;cursor:pointer}
 .opt{margin:0 0 8px 32px}
@@ -85,8 +91,8 @@ details.bonus summary{font-weight:700;min-height:42px;display:flex;align-items:c
 .inl input[type=number]{width:70px;padding:8px;font-size:16px;border:1.5px solid var(--line);border-radius:10px;background:transparent;color:var(--fg)}
 #panel{transition:opacity .25s}
 #panel.ghost{opacity:.12;pointer-events:none}
-#panel.p-top{top:calc(var(--sat) + 64px);bottom:auto}
-#panel.p-left,#panel.p-right{top:calc(var(--sat) + 64px);bottom:auto;max-height:calc(100dvh - 130px);width:min(320px,86vw);max-width:none;margin:0}
+#panel.p-top{top:calc(var(--sat) + 118px);bottom:auto}
+#panel.p-left,#panel.p-right{top:calc(var(--sat) + 118px);bottom:auto;max-height:calc(100dvh - 190px);width:min(320px,86vw);max-width:none;margin:0}
 #panel.p-left{left:8px;right:auto}
 #panel.p-right{right:8px;left:auto}
 .seg{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 0;font-size:13px;color:var(--mut)}
@@ -105,6 +111,11 @@ html.native{--sat:max(env(safe-area-inset-top,0px),38px);--sab:max(env(safe-area
 .leaflet-top{top:var(--sat)}
 .leaflet-bottom{bottom:var(--sab)}
 #err{position:fixed;left:8px;right:8px;top:calc(var(--sat) + 60px);z-index:4000;background:#b42318;color:#fff;padding:10px 12px;border-radius:12px;font-size:13px}
+#status.warn{background:#fff3cd;color:#5c3b00;border-color:#facc15}
+.leaflet-top{top:calc(var(--sat, env(safe-area-inset-top,0px)) + 58px)}
+#consent{position:fixed;left:10px;right:10px;top:calc(var(--sat, env(safe-area-inset-top,0px)) + 64px);z-index:4500;background:var(--bg);color:var(--fg);border:3px solid #facc15;border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.35}
+#consent[hidden]{display:none}
+#consent b{font-size:17px}
 </style>
 </head>
 <body>
@@ -118,7 +129,7 @@ html.native{--sat:max(env(safe-area-inset-top,0px),38px);--sab:max(env(safe-area
 </div>
 
 <section id="panel" aria-label="Réglages administrateur">
-  <div class="phead"><h2>Préparer la partie</h2><button class="b sm" id="fold" type="button">Réduire</button></div>
+  <div class="phead"><h2>Préparer la partie</h2><span class="hb"><button class="b sm main2" id="okQuick" type="button">Valider</button><button class="b sm" id="fold" type="button">Réduire</button></span></div>
   <div id="pbody">
     <div class="seg" id="seg"><span>Menu :</span><button class="b sm" data-p="bottom" type="button">Bas</button><button class="b sm" data-p="top" type="button">Haut</button><button class="b sm" data-p="left" type="button">Gauche</button><button class="b sm" data-p="right" type="button">Droite</button></div>
     <div class="step"><span class="n">1</span><div><strong>Place la zone</strong><p class="hint">Glisse la poignée orange pour déplacer le carré, puis règle sa taille.</p></div></div>
@@ -131,13 +142,13 @@ html.native{--sat:max(env(safe-area-inset-top,0px),38px);--sab:max(env(safe-area
     <details class="bonus"><summary>Bonus (facultatif)</summary>
       <p class="hint">Des options en plus pour pimenter la partie. Coche-en une pour voir ses réglages.</p>
       <div class="seg"><span id="roleTxt"></span><button class="b sm" id="roleBtn" type="button">Changer</button></div>
-      <div class="bo"><label class="chk"><input type="checkbox" id="bTrack"><span><b>Suivi de l’admin de terrain</b><small>Le téléphone de celui qui se cache envoie sa position. Seul l’admin virtuel la voit, avec un 🐺 sur sa carte.</small></span></label>
+      <div class="bo"><label class="chk"><input type="checkbox" id="bTrack"><span><b>Suivi de l’admin de terrain</b><small>Toujours actif : l’admin virtuel voit en permanence le point jaune de l’admin de terrain.</small></span></label>
         <div class="opt" id="oTrack" hidden><p class="st" id="stTrack"></p><p class="hint">Le téléphone de terrain doit garder la page (ou l’appli) ouverte.</p></div></div>
       <div class="bo"><label class="chk"><input type="checkbox" id="bAuto"><span><b>Cercle automatique</b><small>Place le cercle au hasard autour de la cachette, jamais pile dessus. Active le suivi tout seul.</small></span></label>
         <div class="opt" id="oAuto" hidden><p class="st" id="stAuto"></p><button class="b" id="genC" type="button">Générer le cercle</button></div></div>
       <div class="bo"><label class="chk"><input type="checkbox" id="bTimer"><span><b>Minuteur</b><small>Un compte à rebours affiché chez tous les joueurs.</small></span></label>
         <div class="opt" id="oTimer" hidden><p class="st" id="stTimer"></p><div class="inl"><input type="number" id="tMin" value="30" min="1"> min <button class="b sm" id="tGo" type="button">Lancer</button><button class="b sm warn" id="tStop" type="button">Arrêter</button></div></div></div>
-      <div class="bo"><label class="chk"><input type="checkbox" id="bBattle"><span><b>Bataille finale</b><small>Un très grand cercle collé à l’admin de terrain, qui rétrécit sans arrêt. À ce moment-là, tous les joueurs voient sa position.</small></span></label>
+      <div class="bo"><label class="chk"><input type="checkbox" id="bBattle"><span><b>Bataille finale</b><small>Un très grand cercle collé à l’admin de terrain, qui rétrécit sans arrêt. À ce moment-là, tous les joueurs voient sa position (point jaune).</small></span></label>
         <div class="opt" id="oBattle" hidden><p class="st" id="stBattle"></p><div class="inl">durée <input type="number" id="bDur" value="10" min="1"> min, rayon final <input type="number" id="bR1" value="30" min="10"> m</div><div class="inl"><button class="b sm" id="bGo" type="button">Lancer</button><button class="b sm warn" id="bStop" type="button">Arrêter</button></div></div></div>
     </details>
     <div class="step"><span class="n">3</span><div><strong>Valide</strong><p class="hint">Les joueurs voient le changement en quelques secondes.</p></div></div>
@@ -153,6 +164,11 @@ html.native{--sat:max(env(safe-area-inset-top,0px),38px);--sab:max(env(safe-area
 <div id="ghostBar"><span id="gtxt"></span><button class="b sm" id="gcancel" type="button">Annuler</button></div>
 <div id="timer" hidden></div>
 <div id="toast" role="status"></div>
+<div id="consent" role="dialog" aria-labelledby="ctt" hidden>
+  <b id="ctt">Partager ta position ?</b>
+  <span>L’admin virtuel doit voir ta position (point jaune) pour gérer la partie. Seuls les admins la voient, et tous les joueurs pendant la bataille finale.</span>
+  <div class="btns"><button class="b main2" id="cYes" type="button">Oui, partager</button><button class="b" id="cNo" type="button">Non</button></div>
+</div>
 <div class="veil" id="helpV"><div class="card" role="dialog" aria-labelledby="ht">
   <h2 id="ht">Loup géant</h2>
   <p class="sub">Retrouve la cachette dans la zone de jeu.</p>
@@ -204,7 +220,7 @@ const show = id => $(id).classList.add("show"), hide = id => $(id).classList.rem
 let tt;
 function toast(t) { const e = $("toast"); e.textContent = t; e.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => e.classList.remove("show"), 2600); }
 function setFold(b) { $("panel").classList.toggle("fold", b); $("fold").textContent = b ? "Agrandir" : "Réduire"; }
-let role = null, posData = null, hiderMk = null, lastPush = 0, bCenter = null, bRad = 0, lastPos = null, lastAcc = 0, ch = null, selfPush = false, cfg = null, fromLink = false, admin = false, placing = false, handle = null;
+let gpsErrMsg = "", role = null, posData = null, hiderMk = null, lastPush = 0, bCenter = null, bRad = 0, lastPos = null, lastAcc = 0, ch = null, selfPush = false, cfg = null, fromLink = false, admin = false, placing = false, handle = null;
 
 try {
   const m = location.hash.match(/z=([^&]+)/);
@@ -265,15 +281,28 @@ function syncCircleHandle() {
 
 // Texte d’état : distance au cercle, ou hors zone
 function updateStatus() {
-  if (!lastPos) return;
-  const here = L.latLng(lastPos);
-  let t = "Ta position · précision ~" + Math.round(lastAcc) + " m";
-  if (!zoneBounds().contains(here)) t = "Tu es hors de la zone de jeu";
-  else if (curTarget()) {
-    const tg = curTarget(); const d = here.distanceTo(L.latLng(tg.c)) - tg.r;
-    t = d <= 0 ? "Tu es dans le cercle" : "Cercle à " + (d >= 1000 ? (d / 1000).toFixed(1) + " km" : Math.round(d) + " m");
+  if (role === "virtuel") {
+    let vt, vbad = false;
+    if (posData) { const sc = Math.round((Date.now() - posData.t) / 1000); vt = "Point jaune : " + (sc < 15 ? "admin de terrain en direct" : "dernière position il y a " + (sc < 120 ? sc + " s" : Math.round(sc / 60) + " min")); vbad = sc >= 30; }
+    else { vt = "Point jaune : en attente de l’admin de terrain (il doit accepter le partage)"; vbad = true; }
+    $("stxt").textContent = vt; $("status").classList.toggle("warn", vbad); return;
+  }
+  let t = "Recherche de ta position…", bad = false;
+  if (lastPos) {
+    const here = L.latLng(lastPos);
+    t = "Ta position · précision ~" + Math.round(lastAcc) + " m";
+    if (!zoneBounds().contains(here)) t = "Tu es hors de la zone de jeu";
+    else if (curTarget()) {
+      const tg = curTarget(); const d = here.distanceTo(L.latLng(tg.c)) - tg.r;
+      t = d <= 0 ? "Tu es dans le cercle" : "Cercle à " + (d >= 1000 ? (d / 1000).toFixed(1) + " km" : Math.round(d) + " m");
+    }
+  } else if (gpsErrMsg) { t = gpsErrMsg; bad = true; }
+  if (role === "terrain" && trackWanted(cfg)) {
+    if (consent === "yes") { t += " · " + (shareMsg || "partage en cours…"); bad = bad || shareErr; }
+    else { t += " · partage non accepté (touche ici pour accepter)"; bad = true; }
   }
   $("stxt").textContent = t;
+  $("status").classList.toggle("warn", bad);
 }
 
 // Joueurs : toute la zone visible avec une marge, zoom libre, impossible de sortir de la marge
@@ -292,12 +321,12 @@ function fitZone() { map.fitBounds(zoneBounds().pad(0.2), { animate: true }); }
 
 // Position personnelle (visible uniquement par la personne elle-même)
 const me = L.marker([0, 0], { icon: L.divIcon({ className: "", html: '<div class="me"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }), interactive: false, keyboard: false });
-const acc = L.circle([0, 0], { radius: 1, stroke: false, fillColor: "#2563eb", fillOpacity: .13, interactive: false });
+const acc = L.circle([0, 0], { radius: 1, color: "#2563eb", weight: 2, fillColor: "#2563eb", fillOpacity: .35, interactive: false });
 let firstFix = true;
 // Dans l’appli native, la position continue d’arriver écran éteint (service de premier plan Android)
 function nativeWatch(cb, errcb) {
   const BG = Capacitor.registerPlugin("BackgroundGeolocation");
-  BG.addWatcher({ backgroundTitle: "Loup géant", backgroundMessage: "Ta position est partagée avec la partie", requestPermissions: true, stale: false, distanceFilter: 3 },
+  BG.addWatcher({ backgroundTitle: "📍 Loup géant : position partagée", backgroundMessage: "Touche pour revenir dans l’appli", requestPermissions: true, stale: false, distanceFilter: 3 },
     (loc, err) => {
       if (err) {
         if (err.code === "NOT_AUTHORIZED" && confirm("Autorise la localisation « Tout le temps » dans les réglages de l’appli.")) BG.openSettings();
@@ -307,23 +336,25 @@ function nativeWatch(cb, errcb) {
     }).catch(errcb);
 }
 const watchPos = NATIVE ? (cb, errcb) => { try { nativeWatch(cb, errcb); } catch (e) { errcb(e); } } : (cb, errcb, opts) => navigator.geolocation.watchPosition(cb, errcb, opts);
-if (NATIVE || "geolocation" in navigator) {
+let gpsOn = false;
+function startGps() {
+  if (gpsOn) return;
+  gpsOn = true;
+  if (NATIVE || "geolocation" in navigator) {
   watchPos(p => {
     const ll = [p.coords.latitude, p.coords.longitude];
-    me.setLatLng(ll); acc.setLatLng(ll).setRadius(p.coords.accuracy);
+    me.setLatLng(ll); acc.setLatLng(ll);
     if (!map.hasLayer(me)) { acc.addTo(map); me.addTo(map); }
-    lastPos = ll; lastAcc = p.coords.accuracy; updateStatus();
-    if (role === "terrain" && DB && cfg.bonus && (cfg.bonus.track || battleActive(cfg)) && Date.now() - lastPush > 3000) {
-      lastPush = Date.now();
-      fetch(DBU + "/pos.json", { method: "PUT", body: JSON.stringify({ lat: ll[0], lng: ll[1], t: Date.now() }) }).catch(() => {});
-    }
+    gpsErrMsg = ""; lastPos = ll; lastAcc = p.coords.accuracy; updateStatus();
     if (firstFix && !fromLink) { cfg.c = ll; draw(); map.setView(ll, 16); }
     firstFix = false;
-  }, () => { $("stxt").textContent = "Position indisponible : autorise la localisation."; },
+  }, () => { gpsOn = false; gpsErrMsg = "Position indisponible : autorise la localisation."; updateStatus(); },
   { enableHighAccuracy: true, maximumAge: 2000 });
-} else {
-  $("stxt").textContent = "La géolocalisation n’est pas disponible.";
+  } else {
+    $("stxt").textContent = "La géolocalisation n’est pas disponible.";
+  }
 }
+startGps();
 
 $("fitBtn").onclick = () => admin ? map.fitBounds(zoneBounds().pad(0.3)) : fitZone();
 $("locBtn").onclick = () => { if (map.hasLayer(me)) map.setView(me.getLatLng(), Math.max(map.getZoom(), 17)); };
@@ -334,8 +365,7 @@ function enterAdmin() {
   $("share").hidden = true;
   $("panel").style.display = "block";
   $("fabs").style.display = "none";
-  $("status").style.display = "none";
-  $("adminBtn").textContent = "Admin ✓";
+  setAdminLabel();
   $("w").value = cfg.w; $("h").value = cfg.h; $("r").value = cfg.r || 80; $("vis").checked = cfg.show !== false;
   loadBonus(); updateRole();
   unlockAdmin();
@@ -355,8 +385,7 @@ function exitAdmin() {
   $("place").classList.remove("on");
   if (handle) { map.removeLayer(handle); handle = null; }
   $("fabs").style.display = "flex";
-  $("status").style.display = "flex";
-  $("adminBtn").textContent = "Admin";
+  setAdminLabel();
 }
 
 $("adminBtn").onclick = () => {
@@ -451,6 +480,7 @@ async function pull() {
 }
 
 try { role = sessionStorage.getItem("lg_role"); } catch (e) {}
+setAdminLabel();
 
 function battleActive(c) { return !!(c && c.battle && c.battle.on); }
 function battleRadius(b) { return b.r0 + (b.r1 - b.r0) * Math.min(1, Math.max(0, (Date.now() - b.start) / b.dur)); }
@@ -473,22 +503,24 @@ function tick() {
     const c = role === "terrain" && lastPos ? lastPos : (posData ? [posData.lat, posData.lng] : null);
     if (c) { bCenter = c; bRad = battleRadius(cfg.battle); bc.setLatLng(c).setRadius(bRad); if (!map.hasLayer(bc)) bc.addTo(map); updateStatus(); }
   } else { bCenter = null; if (map.hasLayer(bc)) map.removeLayer(bc); }
+  if (role) updateStatus();
   if (admin) bonusStatus();
+  consentCheck();
 }
 setInterval(tick, 1000);
 
 async function pollPos() {
   if (!DB || role === "terrain") return;
-  const virt = role === "virtuel" && cfg.bonus && cfg.bonus.track;
-  if (hiderMk && !virt) { map.removeLayer(hiderMk); hiderMk = null; }
-  if (!virt && !battleActive(cfg)) return;
+  const showMk = role === "virtuel" || battleActive(cfg);
+  if (hiderMk && !showMk) { map.removeLayer(hiderMk); hiderMk = null; }
+  if (!showMk) return;
   try {
     const p = await (await fetch(DBU + "/pos.json", { cache: "no-store" })).json();
     if (!p || !p.lat) return;
     posData = p;
-    if (virt) {
+    if (showMk) {
       const ll = [p.lat, p.lng];
-      if (!hiderMk) hiderMk = L.marker(ll, { icon: L.divIcon({ className: "", html: '<div class="hider">🐺</div>', iconSize: [40, 40], iconAnchor: [20, 20] }), interactive: false, zIndexOffset: 800 }).addTo(map);
+      if (!hiderMk) hiderMk = L.marker(ll, { icon: L.divIcon({ className: "", html: '<div class="hider"></div>', iconSize: [24, 24], iconAnchor: [12, 12] }), interactive: false, zIndexOffset: 800 }).addTo(map);
       else hiderMk.setLatLng(ll);
     }
   } catch (e) {}
@@ -506,10 +538,12 @@ const BON = { bTrack: ["track", "oTrack"], bAuto: ["auto", "oAuto"], bTimer: ["t
 function loadBonus() {
   const b = cfg.bonus || {};
   for (const id in BON) { $(id).checked = !!b[BON[id][0]]; $(BON[id][1]).hidden = !$(id).checked; }
+  $("bTrack").checked = true; $("bTrack").disabled = true; $("oTrack").hidden = false;
 }
 for (const id in BON) $(id).onchange = e => {
   cfg.bonus = cfg.bonus || {};
   cfg.bonus[BON[id][0]] = e.target.checked;
+  if (role === "terrain" && e.target.checked && (id === "bTrack" || id === "bAuto")) saveConsent("yes");
   $(BON[id][1]).hidden = !e.target.checked;
   if (id === "bAuto" && e.target.checked && !cfg.bonus.track) {
     cfg.bonus.track = true; $("bTrack").checked = true; $("oTrack").hidden = false;
@@ -526,6 +560,7 @@ $("genC").onclick = () => {
 $("tGo").onclick = () => { cfg.timer = { end: Date.now() + Math.max(1, +$("tMin").value || 1) * 60000 }; pushState(); };
 $("tStop").onclick = () => { cfg.timer = null; pushState(); };
 $("bGo").onclick = () => {
+  if (role === "terrain") saveConsent("yes");
   cfg.bonus = cfg.bonus || {}; cfg.bonus.track = true; $("bTrack").checked = true;
   cfg.battle = { on: true, start: Date.now(), dur: Math.max(1, +$("bDur").value || 1) * 60000, r0: Math.round(Math.hypot(cfg.w, cfg.h)), r1: Math.max(10, +$("bR1").value || 30) };
   draw(); pushState();
@@ -574,12 +609,12 @@ function updateRole() { $("roleTxt").textContent = "Rôle : " + (role === "terra
 $("roleBtn").onclick = () => {
   role = role === "terrain" ? "virtuel" : "terrain";
   try { sessionStorage.setItem("lg_role", role); } catch (e) {}
-  updateRole(); toast("Rôle changé : " + (role === "terrain" ? "admin de terrain" : "admin virtuel"));
+  updateRole(); setAdminLabel(); toast("Rôle changé : " + (role === "terrain" ? "admin de terrain" : "admin virtuel"));
 };
 function bonusStatus() {
   const now = Date.now();
   let t;
-  if (role === "terrain") t = lastPos ? "✓ Ta position est envoyée aux admins." : "En attente du GPS de ce téléphone…";
+  if (role === "terrain") t = consent !== "yes" ? "Tu n’as pas encore accepté de partager ta position." : (shareMsg || "En attente…");
   else if (posData) { const s = Math.round((now - posData.t) / 1000); t = s < 15 ? "✓ Position reçue il y a " + s + " s." : "Dernière position il y a " + (s < 120 ? s + " s" : Math.round(s / 60) + " min") + " : le téléphone de terrain est-il ouvert ?"; }
   else t = "En attente de la position de l’admin de terrain…";
   $("stTrack").textContent = t;
@@ -595,6 +630,31 @@ function areaBounds() {
   return L.latLngBounds([c.lat - dLat, c.lng - dLng], [c.lat + dLat, c.lng + dLng]);
 }
 $("layBtn").onclick = () => { map.removeLayer(base); base = base === sat ? plan : sat; base.addTo(map); errs = 0; };
+
+// ---- Partage de position : l’admin de terrain doit accepter ----
+let shareMsg = "", shareErr = false, consent = null;
+try { consent = sessionStorage.getItem("lg_consent"); } catch (e) {}
+function saveConsent(v) { consent = v; try { sessionStorage.setItem("lg_consent", v); } catch (e) {} }
+function trackWanted() { return true; }
+function consentCheck() { $("consent").hidden = !(role === "terrain" && trackWanted(cfg) && !consent); }
+$("cYes").onclick = () => { saveConsent("yes"); consentCheck(); startGps(); pushPos(); toast("Partage de ta position activé ✓"); };
+$("cNo").onclick = () => { saveConsent("no"); consentCheck(); updateStatus(); toast("Partage refusé : le suivi reste désactivé"); };
+$("status").onclick = () => {
+  if (role === "terrain" && consent !== "yes") { saveConsent(""); consentCheck(); }
+  else if (role === "virtuel" && hiderMk) map.setView(hiderMk.getLatLng(), Math.max(map.getZoom(), 17));
+};
+// La position est envoyée toutes les 4 s, même si le téléphone ne bouge pas
+function pushPos() {
+  if (!(DB && role === "terrain" && consent === "yes" && trackWanted(cfg))) return;
+  if (!lastPos) { shareMsg = "en attente du GPS"; shareErr = true; return; }
+  fetch(DBU + "/pos.json", { method: "PUT", body: JSON.stringify({ lat: lastPos[0], lng: lastPos[1], t: Date.now() }) })
+    .then(r => { shareErr = !r.ok; shareMsg = r.ok ? "position partagée ✓" : "échec d’envoi (code " + r.status + ")"; })
+    .catch(() => { shareErr = true; shareMsg = "échec d’envoi : pas de connexion"; });
+}
+setInterval(pushPos, 4000);
+
+function setAdminLabel() { $("adminBtn").innerHTML = "Admin" + (role === "terrain" ? '<i class="dotY"></i>' : "") + (admin ? " ✓" : ""); }
+$("okQuick").onclick = () => $("ok").click();
 
 draw();
 if (fromLink) lockPlayer();
