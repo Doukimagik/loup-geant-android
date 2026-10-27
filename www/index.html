@@ -94,6 +94,12 @@ details.bonus summary{font-weight:700;min-height:42px;display:flex;align-items:c
 #ghostBar.show{display:flex}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--bg);color:var(--fg)}
 .pm{display:flex;gap:8px;margin:2px 0}
+.bo{border-top:1px solid var(--line);padding:6px 0}
+.bo .chk{align-items:flex-start;min-height:0;padding:4px 0}
+.bo .chk input{margin-top:2px;flex:none}
+.bo .chk span{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.bo .chk small{font-weight:400;color:var(--mut);font-size:12.5px;line-height:1.35}
+.st{font-weight:700;font-size:13px;margin:4px 0}
 </style>
 </head>
 <body>
@@ -101,6 +107,7 @@ details.bonus summary{font-weight:700;min-height:42px;display:flex;align-items:c
 <div id="top"><button id="helpBtn" type="button" aria-label="Aide">?</button><button id="adminBtn" type="button">Admin</button></div>
 <div id="status"><i></i><span id="stxt">Recherche de ta position…</span></div>
 <div id="fabs">
+  <button class="fab" id="layBtn" type="button" aria-label="Plan ou satellite" title="Plan / satellite">🛰</button>
   <button class="fab" id="fitBtn" type="button" aria-label="Voir toute la zone" title="Voir toute la zone">⤢</button>
   <button class="fab" id="locBtn" type="button" aria-label="Me retrouver" title="Me retrouver">◎</button>
 </div>
@@ -116,15 +123,17 @@ details.bonus summary{font-weight:700;min-height:42px;display:flex;align-items:c
     <div class="row"><label for="r">Rayon du cercle</label><input id="r" type="range" min="20" max="500" step="10"><output id="ro"></output></div>
     <label class="chk"><input type="checkbox" id="vis" checked> Montrer le cercle aux joueurs</label>
     <div class="btns"><button class="b" id="place" type="button">Placer le cercle</button><button class="b warn" id="clear" type="button">Retirer le cercle</button></div>
-    <details class="bonus"><summary>Bonus</summary>
-      <label class="chk"><input type="checkbox" id="bTrack"> Suivi de l’admin de terrain</label>
-      <div class="opt" id="oTrack" hidden><p class="hint">L’admin de terrain partage sa position, que seul l’admin virtuel voit sur sa carte. Garde la page ouverte sur son téléphone.</p></div>
-      <label class="chk"><input type="checkbox" id="bAuto"> Cercle automatique</label>
-      <div class="opt" id="oAuto" hidden><p class="hint">Prend la position de la cachette et place le cercle au hasard autour, jamais centré dessus. Nécessite le suivi.</p><button class="b" id="genC" type="button">Générer le cercle</button></div>
-      <label class="chk"><input type="checkbox" id="bTimer"> Minuteur</label>
-      <div class="opt" id="oTimer" hidden><div class="inl"><input type="number" id="tMin" value="30" min="1"> min <button class="b sm" id="tGo" type="button">Lancer</button><button class="b sm warn" id="tStop" type="button">Arrêter</button></div></div>
-      <label class="chk"><input type="checkbox" id="bBattle"> Bataille finale</label>
-      <div class="opt" id="oBattle" hidden><p class="hint">Un très grand cercle collé à l’admin de terrain, qui rétrécit sans arrêt jusqu’au rayon final.</p><div class="inl">durée <input type="number" id="bDur" value="10" min="1"> min, final <input type="number" id="bR1" value="30" min="10"> m</div><div class="inl"><button class="b sm" id="bGo" type="button">Lancer</button><button class="b sm warn" id="bStop" type="button">Arrêter</button></div></div>
+    <details class="bonus"><summary>Bonus (facultatif)</summary>
+      <p class="hint">Des options en plus pour pimenter la partie. Coche-en une pour voir ses réglages.</p>
+      <div class="seg"><span id="roleTxt"></span><button class="b sm" id="roleBtn" type="button">Changer</button></div>
+      <div class="bo"><label class="chk"><input type="checkbox" id="bTrack"><span><b>Suivi de l’admin de terrain</b><small>Le téléphone de celui qui se cache envoie sa position. Seul l’admin virtuel la voit, avec un 🐺 sur sa carte.</small></span></label>
+        <div class="opt" id="oTrack" hidden><p class="st" id="stTrack"></p><p class="hint">Le téléphone de terrain doit garder la page (ou l’appli) ouverte.</p></div></div>
+      <div class="bo"><label class="chk"><input type="checkbox" id="bAuto"><span><b>Cercle automatique</b><small>Place le cercle au hasard autour de la cachette, jamais pile dessus. Active le suivi tout seul.</small></span></label>
+        <div class="opt" id="oAuto" hidden><p class="st" id="stAuto"></p><button class="b" id="genC" type="button">Générer le cercle</button></div></div>
+      <div class="bo"><label class="chk"><input type="checkbox" id="bTimer"><span><b>Minuteur</b><small>Un compte à rebours affiché chez tous les joueurs.</small></span></label>
+        <div class="opt" id="oTimer" hidden><p class="st" id="stTimer"></p><div class="inl"><input type="number" id="tMin" value="30" min="1"> min <button class="b sm" id="tGo" type="button">Lancer</button><button class="b sm warn" id="tStop" type="button">Arrêter</button></div></div></div>
+      <div class="bo"><label class="chk"><input type="checkbox" id="bBattle"><span><b>Bataille finale</b><small>Un très grand cercle collé à l’admin de terrain, qui rétrécit sans arrêt. À ce moment-là, tous les joueurs voient sa position.</small></span></label>
+        <div class="opt" id="oBattle" hidden><p class="st" id="stBattle"></p><div class="inl">durée <input type="number" id="bDur" value="10" min="1"> min, rayon final <input type="number" id="bR1" value="30" min="10"> m</div><div class="inl"><button class="b sm" id="bGo" type="button">Lancer</button><button class="b sm warn" id="bStop" type="button">Arrêter</button></div></div></div>
     </details>
     <div class="step"><span class="n">3</span><div><strong>Valide</strong><p class="hint">Les joueurs voient le changement en quelques secondes.</p></div></div>
     <button class="b main" id="ok" type="button">Valider et envoyer</button>
@@ -171,8 +180,8 @@ async function hashCode(v) {
 }
 // Adresse de ta base Firebase, sans / à la fin. Laisse vide pour le mode « lien » seul.
 const DB = "https://chasse-a-l-homme-22573-default-rtdb.europe-west1.firebasedatabase.app";
-// Marge autour de la zone visible par les joueurs (0.3 = 30 % de chaque côté)
-const MARGIN = 0.3;
+// Marge autour de la zone, en proportion de sa taille (1.0 = une zone entière de chaque côté)
+const MARGIN = 1.0;
 const DBU = DB.replace(/\/$/, "");
 
 const $ = id => document.getElementById(id);
@@ -191,12 +200,15 @@ if (!cfg) cfg = { c: [47.1667, -1.4667], w: 800, h: 800, ci: null, r: 80 };
 
 const map = L.map("map", { zoomSnap: 0.25, zoomDelta: 0.5, zoomControl: false, maxZoom: 19 }).setView(cfg.c, 15);
 L.control.zoom({ position: "topleft" }).addTo(map);
-L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-  subdomains: "abcd", maxZoom: 19, attribution: "© OpenStreetMap, © CARTO"
-}).addTo(map);
+// Fonds de carte sans clé d’API : OpenStreetMap, avec Esri en secours et en vue satellite
+const plan = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" });
+const rues = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: "© Esri" });
+const sat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: "© Esri" });
+let base = plan.addTo(map), errs = 0;
+plan.on("tileerror", () => { if (++errs === 6 && base === plan) { map.removeLayer(plan); base = rues.addTo(map); toast("Fond de carte de secours activé"); } });
 
 const world = [[-85, -180], [-85, 180], [85, 180], [85, -180]];
-const mask = L.polygon([world, world], { stroke: false, fillColor: "#7d838c", fillOpacity: .78, interactive: false }).addTo(map);
+const mask = L.polygon([world, world], { stroke: false, fillColor: "#7d838c", fillOpacity: .6, interactive: false }).addTo(map);
 const casing = L.rectangle([[0, 0], [1, 1]], { color: "#fff", weight: 9, opacity: .95, fill: false, interactive: false }).addTo(map);
 const rect = L.rectangle([[0, 0], [1, 1]], { color: "#1f7a54", weight: 4, fill: false, interactive: false }).addTo(map);
 const circ = L.circle([0, 0], { radius: 1, color: "#e03131", weight: 3, dashArray: "10 7", fillColor: "#e03131", fillOpacity: .2, interactive: true, bubblingMouseEvents: true });
@@ -252,16 +264,17 @@ function updateStatus() {
 
 // Joueurs : toute la zone visible avec une marge, zoom libre, impossible de sortir de la marge
 function lockPlayer() {
-  const area = zoneBounds().pad(MARGIN);
+  const area = areaBounds();
   map.setMaxBounds(null);
   map.setMinZoom(0);
   map.fitBounds(area, { animate: false });
   map.setMinZoom(map.getZoom());
   map.options.maxBoundsViscosity = 1;
   map.setMaxBounds(area);
+  map.fitBounds(zoneBounds().pad(0.2), { animate: false });
 }
 function unlockAdmin() { map.setMaxBounds(null); map.setMinZoom(3); }
-function fitZone() { map.fitBounds(zoneBounds().pad(MARGIN), { animate: true }); }
+function fitZone() { map.fitBounds(zoneBounds().pad(0.2), { animate: true }); }
 
 // Position personnelle (visible uniquement par la personne elle-même)
 const me = L.marker([0, 0], { icon: L.divIcon({ className: "", html: '<div class="me"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }), interactive: false, keyboard: false });
@@ -309,6 +322,7 @@ function enterAdmin() {
   $("status").style.display = "none";
   $("adminBtn").textContent = "Admin ✓";
   $("w").value = cfg.w; $("h").value = cfg.h; $("r").value = cfg.r || 80; $("vis").checked = cfg.show !== false;
+  loadBonus(); updateRole();
   unlockAdmin();
   map.fitBounds(zoneBounds().pad(0.3), { animate: false });
   handle = L.marker(cfg.c, {
@@ -444,6 +458,7 @@ function tick() {
     const c = role === "terrain" && lastPos ? lastPos : (posData ? [posData.lat, posData.lng] : null);
     if (c) { bCenter = c; bRad = battleRadius(cfg.battle); bc.setLatLng(c).setRadius(bRad); if (!map.hasLayer(bc)) bc.addTo(map); updateStatus(); }
   } else { bCenter = null; if (map.hasLayer(bc)) map.removeLayer(bc); }
+  if (admin) bonusStatus();
 }
 setInterval(tick, 1000);
 
@@ -481,10 +496,14 @@ for (const id in BON) $(id).onchange = e => {
   cfg.bonus = cfg.bonus || {};
   cfg.bonus[BON[id][0]] = e.target.checked;
   $(BON[id][1]).hidden = !e.target.checked;
+  if (id === "bAuto" && e.target.checked && !cfg.bonus.track) {
+    cfg.bonus.track = true; $("bTrack").checked = true; $("oTrack").hidden = false;
+    toast("Suivi activé aussi : nécessaire pour le cercle automatique");
+  }
 };
 $("genC").onclick = () => {
   const p = role === "terrain" ? lastPos : (posData ? [posData.lat, posData.lng] : null);
-  if (!p) { toast("Active le suivi : position de la cachette inconnue"); return; }
+  if (!p) { toast("Position de la cachette inconnue : le téléphone de terrain doit être ouvert, suivi actif"); return; }
   const r = cfg.r || 80, d = r * 0.7 * Math.sqrt(Math.random()), a = Math.random() * 2 * Math.PI;
   cfg.ci = [p[0] + d * Math.cos(a) / 111320, p[1] + d * Math.sin(a) / (111320 * Math.cos(p[0] * Math.PI / 180))];
   draw(); toast("Cercle généré, tu peux encore le déplacer");
@@ -535,6 +554,32 @@ document.querySelectorAll("#seg button").forEach(b => b.onclick = () => setPos(b
 let savedPos = "bottom";
 try { savedPos = localStorage.getItem("lg_pos") || "bottom"; } catch (e) {}
 setPos(savedPos);
+
+function updateRole() { $("roleTxt").textContent = "Rôle : " + (role === "terrain" ? "admin de terrain (tu te caches)" : "admin virtuel (tu gères à distance)"); }
+$("roleBtn").onclick = () => {
+  role = role === "terrain" ? "virtuel" : "terrain";
+  try { sessionStorage.setItem("lg_role", role); } catch (e) {}
+  updateRole(); toast("Rôle changé : " + (role === "terrain" ? "admin de terrain" : "admin virtuel"));
+};
+function bonusStatus() {
+  const now = Date.now();
+  let t;
+  if (role === "terrain") t = lastPos ? "✓ Ta position est envoyée aux admins." : "En attente du GPS de ce téléphone…";
+  else if (posData) { const s = Math.round((now - posData.t) / 1000); t = s < 15 ? "✓ Position reçue il y a " + s + " s." : "Dernière position il y a " + (s < 120 ? s + " s" : Math.round(s / 60) + " min") + " : le téléphone de terrain est-il ouvert ?"; }
+  else t = "En attente de la position de l’admin de terrain…";
+  $("stTrack").textContent = t;
+  $("stAuto").textContent = cfg.ci ? "Un cercle est en place. Tu peux en générer un nouveau." : "Pas encore de cercle.";
+  if (cfg.timer && cfg.timer.end) { const r = cfg.timer.end - now; $("stTimer").textContent = r > 0 ? "En cours : " + Math.floor(r / 60000) + " min " + (Math.floor(r / 1000) % 60) + " s restantes." : "Terminé."; }
+  else $("stTimer").textContent = "Pas de minuteur actif.";
+  $("stBattle").textContent = battleActive(cfg) ? "En cours : rayon " + Math.round(bRad) + " m, jusqu’à " + cfg.battle.r1 + " m." : "Pas de bataille en cours.";
+}
+function areaBounds() {
+  const b = zoneBounds().pad(MARGIN), c = b.getCenter();
+  const dLat = Math.max(b.getNorth() - c.lat, 600 / 111320);
+  const dLng = Math.max(b.getEast() - c.lng, 600 / (111320 * Math.cos(c.lat * Math.PI / 180)));
+  return L.latLngBounds([c.lat - dLat, c.lng - dLng], [c.lat + dLat, c.lng + dLng]);
+}
+$("layBtn").onclick = () => { map.removeLayer(base); base = base === sat ? plan : sat; base.addTo(map); errs = 0; };
 
 draw();
 if (fromLink) lockPlayer();
