@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f7a54">
+<meta name="mobile-web-app-capable" content="yes">
+
+<title>Loup géant – carte du quartier</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--bg:#fbfaf6;--fg:#1c2b24;--mut:#5f6f67;--line:#e2ded1;--zone:#1f7a54;--accent:#e8590c;--danger:#c92a2a;--shadow:0 6px 22px rgba(20,40,30,.22);color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#17211c;--fg:#eef4ef;--mut:#9db0a5;--line:#2f4037;--zone:#4cc38a;--accent:#ff922b;--danger:#ff8787;--shadow:0 6px 22px rgba(0,0,0,.5);color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:"Avenir Next","Trebuchet MS",system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+#map{position:fixed;inset:0;background:#dfe5dc}
+.leaflet-control-attribution{font-size:10px}
+.leaflet-bar{border:none!important;box-shadow:var(--shadow)!important;border-radius:12px!important;overflow:hidden}
+.leaflet-bar a{width:40px!important;height:40px!important;line-height:40px!important;font-size:20px!important;background:var(--bg)!important;color:var(--fg)!important;border-bottom:1px solid var(--line)!important}
+#adminBtn{position:fixed;top:calc(var(--sat) + 12px);right:12px;z-index:1000;border:none;background:var(--fg);color:var(--bg);border-radius:999px;padding:11px 18px;font:700 14px inherit;cursor:pointer;box-shadow:var(--shadow)}
+#adminBtn:focus-visible,.b:focus-visible,.fab:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#fabs{position:fixed;right:12px;bottom:calc(var(--sab) + 34px);z-index:900;display:flex;flex-direction:column;gap:10px}
+.fab{width:46px;height:46px;border-radius:50%;border:none;background:var(--bg);color:var(--fg);font-size:20px;cursor:pointer;box-shadow:var(--shadow)}
+#status{position:fixed;left:10px;right:10px;top:calc(var(--sat, var(--sat)) + 8px);z-index:900;background:var(--bg);color:var(--fg);border:2px solid transparent;border-radius:14px;padding:11px 14px;font-size:14px;font-weight:600;line-height:1.3;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px}
+#status i{width:9px;height:9px;border-radius:50%;background:#2563eb;flex:none}
+#panel{position:fixed;left:8px;right:8px;bottom:calc(var(--sab) + 8px);z-index:1001;background:var(--bg);border-radius:20px;padding:16px 18px;box-shadow:var(--shadow);display:none;max-height:62%;overflow:auto;max-width:520px;margin:0 auto}
+#panel h2{margin:0 0 6px;font-size:18px}
+.row{display:grid;grid-template-columns:100px 1fr 64px;align-items:center;gap:8px;margin:8px 0;font-size:14px}
+.row output{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+input[type=range]{accent-color:var(--zone);width:100%}
+.hint{font-size:13px;color:var(--mut);margin:8px 0 0;line-height:1.4}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.b{border:1.5px solid var(--line);background:transparent;color:var(--fg);border-radius:12px;padding:11px 14px;font:700 14px inherit;cursor:pointer}
+.b.main{background:var(--zone);border-color:var(--zone);color:#fff;margin-left:auto}
+.b.warn{color:var(--danger)}
+.b.on{border-color:var(--accent);background:rgba(232,89,12,.12)}
+#link{width:100%;margin-top:8px;padding:9px;border:1.5px solid var(--line);border-radius:10px;background:transparent;color:var(--fg);font-size:12px}
+.handle{background:var(--accent);color:#fff;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;font-size:20px;border:3px solid #fff;box-shadow:var(--shadow)}
+.me{width:18px;height:18px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)}
+html.isTerrain .me{background:#facc15}
+@keyframes pulse{70%{box-shadow:0 0 0 16px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+@media (prefers-reduced-motion:reduce){.me{animation:none}}
+@media (max-width:480px){.row{grid-template-columns:82px 1fr 58px}}
+
+html,body{height:100dvh;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+button{touch-action:manipulation}
+#top{position:fixed;top:calc(var(--sat) + 64px);right:12px;z-index:1000;display:flex;gap:8px}
+#adminBtn{position:static;height:42px;padding:0 18px}
+#helpBtn{width:42px;height:42px;border-radius:50%;border:none;background:var(--bg);color:var(--fg);font:700 18px inherit;cursor:pointer;box-shadow:var(--shadow)}
+#panel{max-height:50dvh}
+#panel.fold #pbody{display:none}
+.phead{display:flex;justify-content:space-between;align-items:center}
+.b{padding:13px 15px}
+.b.sm{padding:7px 12px;font-size:13px}
+#ok{width:100%;margin:14px 0 0}
+input[type=range]{height:34px}
+.step{display:flex;gap:10px;align-items:flex-start;margin:14px 0 4px}
+.step p{margin:2px 0 0}
+.n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--zone);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+.veil{position:fixed;inset:0;z-index:2000;background:rgba(15,30,22,.55);display:none;align-items:flex-end;justify-content:center;padding:12px}
+.veil.show{display:flex}
+.card{background:var(--bg);border-radius:24px;padding:22px 20px calc(var(--sab) + 20px);width:100%;max-width:460px;box-shadow:var(--shadow);max-height:90dvh;overflow:auto}
+.card h2{margin:0 0 4px;font-size:23px}
+.card .sub{margin:0 0 12px;color:var(--mut);font-size:14px}
+.card .b.main{width:100%;margin:16px 0 0;padding:15px;font-size:16px}
+.leg{display:flex;gap:14px;align-items:center;margin:12px 0;font-size:15px;line-height:1.35}
+.sw{flex:none;width:32px;height:32px}
+.sw.blue{border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 2px rgba(37,99,235,.4)}
+.sw.red{border-radius:50%;border:3px dashed #e03131;background:rgba(224,49,49,.2)}
+.sw.green{border-radius:8px;border:4px solid var(--zone)}
+.sw.grey{border-radius:8px;background:#7d838c}
+#pin{width:100%;font-size:24px;letter-spacing:.15em;text-align:center;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:transparent;color:var(--fg)}
+#toast{position:fixed;left:10px;right:10px;top:calc(var(--sat, var(--sat)) + 8px);z-index:5000;background:var(--fg);color:var(--bg);padding:14px 16px;border-radius:14px;font-size:15px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s;text-align:center;box-shadow:var(--shadow)}
+#toast.show{opacity:1}
+@media (min-width:700px){.veil{align-items:center}}
+.chandle{background:#e03131;color:#fff;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;font-size:20px;border:3px solid #fff;box-shadow:var(--shadow)}
+.chk{display:flex;align-items:center;gap:10px;margin:8px 0 0;font-size:14px;min-height:38px}
+.chk input{width:22px;height:22px;accent-color:var(--zone)}
+#timer{position:fixed;top:calc(var(--sat) + 64px);left:50%;transform:translateX(-50%);z-index:900;background:var(--fg);color:var(--bg);border-radius:999px;padding:0 16px;height:42px;display:flex;align-items:center;font:700 17px inherit;font-variant-numeric:tabular-nums;box-shadow:var(--shadow)}
+#timer[hidden]{display:none}
+.hider{width:24px;height:24px;border-radius:50%;background:#facc15;border:3px solid #fff;box-shadow:0 0 0 0 rgba(250,204,21,.7);animation:pulseY 2s infinite}
+@keyframes pulseY{70%{box-shadow:0 0 0 18px rgba(250,204,21,0)}100%{box-shadow:0 0 0 0 rgba(250,204,21,0)}}
+.dotY{display:inline-block;width:10px;height:10px;border-radius:50%;background:#facc15;margin-left:7px;border:1.5px solid var(--bg);vertical-align:middle}
+.hb{display:flex;gap:6px}
+.main2{background:var(--zone);border-color:var(--zone);color:#fff}
+#okQuick{display:none}
+#panel.fold #okQuick{display:inline-block}
+details.bonus{border:1.5px solid var(--line);border-radius:14px;padding:4px 14px;margin:14px 0 0}
+details.bonus summary{font-weight:700;min-height:42px;display:flex;align-items:center;cursor:pointer}
+.opt{margin:0 0 8px 32px}
+.inl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0;font-size:14px}
+.inl input[type=number]{width:70px;padding:8px;font-size:16px;border:1.5px solid var(--line);border-radius:10px;background:transparent;color:var(--fg)}
+#panel{transition:opacity .25s}
+#panel.ghost{opacity:.12;pointer-events:none}
+#panel.p-top{top:calc(var(--sat) + 118px);bottom:auto}
+#panel.p-left,#panel.p-right{top:calc(var(--sat) + 118px);bottom:auto;max-height:calc(100dvh - 190px);width:min(320px,86vw);max-width:none;margin:0}
+#panel.p-left{left:8px;right:auto}
+#panel.p-right{right:8px;left:auto}
+.seg{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 0;font-size:13px;color:var(--mut)}
+#ghostBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--sab) + 22px);z-index:1002;background:var(--fg);color:var(--bg);border-radius:999px;padding:6px 6px 6px 16px;display:none;align-items:center;gap:10px;font-weight:700;font-size:14px;box-shadow:var(--shadow);white-space:nowrap}
+#ghostBar.show{display:flex}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--bg);color:var(--fg)}
+.pm{display:flex;gap:8px;margin:2px 0}
+.bo{border-top:1px solid var(--line);padding:6px 0}
+.bo .chk{align-items:flex-start;min-height:0;padding:4px 0}
+.bo .chk input{margin-top:2px;flex:none}
+.bo .chk span{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.bo .chk small{font-weight:400;color:var(--mut);font-size:12.5px;line-height:1.35}
+.st{font-weight:700;font-size:13px;margin:4px 0}
+.logo{display:block;margin:0 0 8px;border-radius:18px}
+.qrs{display:flex;gap:16px;justify-content:center;margin:10px 0}
+.qrs figure{margin:0;text-align:center;font-size:12.5px;color:var(--mut)}
+.qrs img{display:block;width:116px;height:116px;border-radius:10px;border:1px solid var(--line);margin-bottom:4px}
+#status.warn{background:#fff3cd;color:#5c3b00;border-color:#facc15}
+.leaflet-top{top:calc(var(--sat, var(--sat)) + 58px)}
+#consent{position:fixed;left:10px;right:10px;top:calc(var(--sat, var(--sat)) + 64px);z-index:4500;background:var(--bg);color:var(--fg);border:3px solid #facc15;border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.35}
+#consent[hidden]{display:none}
+#consent b{font-size:17px}
+#vconsent{position:fixed;left:10px;right:10px;top:calc(var(--sat, var(--sat)) + 64px);z-index:4500;background:var(--bg);color:var(--fg);border:3px solid #3b82f6;border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.35}
+#vconsent[hidden]{display:none}
+#vconsent b{font-size:17px}
+#vpanel{position:fixed;left:8px;right:8px;bottom:calc(var(--sab, var(--sab)) + 8px);z-index:1001;background:var(--bg);border-radius:20px;padding:16px 18px;box-shadow:var(--shadow);max-width:520px;margin:0 auto}
+#vpanel[hidden]{display:none}
+.pl{width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid #fff;box-shadow:var(--shadow)}
+#menuBtn{width:42px;height:42px;border-radius:50%;border:none;background:var(--bg);color:var(--fg);font:700 19px inherit;box-shadow:var(--shadow);cursor:pointer}
+.nm{background:var(--bg);color:var(--fg);border:none;border-radius:999px;padding:2px 9px;font:700 12px inherit;box-shadow:var(--shadow)}
+.leaflet-tooltip-top.nm:before{display:none}
+.pseudo{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:700;margin:12px 0 0}
+.pseudo input{font:600 16px inherit;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;background:transparent;color:var(--fg)}
+html.isVirtuel .me{background:#ec4899}
+html.isVisit .me{background:#9ca3af}
+.pk{width:18px;height:18px;border-radius:50%;background:#ec4899;border:3px solid #fff;box-shadow:var(--shadow)}
+.gr{width:16px;height:16px;border-radius:50%;background:#9ca3af;border:3px solid #fff;box-shadow:var(--shadow)}
+.dotP{display:inline-block;width:10px;height:10px;border-radius:50%;background:#ec4899;margin-left:7px;border:1.5px solid var(--bg);vertical-align:middle}
+.pr{display:flex;gap:8px}
+.pr input{flex:1;min-width:0}
+.card .chk{align-items:flex-start;min-height:0;margin-top:12px}
+.card .chk span{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.card .chk small{font-weight:400;color:var(--mut);font-size:12.5px;line-height:1.35}
+.chandle.sel{outline:3px solid #facc15}
+.clist{margin:8px 0}
+.crow{display:flex;gap:6px;margin:5px 0}
+.cname{flex:1;text-align:left;border:1.5px solid var(--line);background:transparent;color:var(--fg);border-radius:12px;padding:11px 12px;font:600 14px inherit;cursor:pointer}
+.crow.sel .cname{border-color:var(--accent);background:rgba(232,89,12,.12)}
+.cx{width:44px;border:1.5px solid var(--line);background:transparent;color:var(--danger);border-radius:12px;font:700 15px inherit;cursor:pointer}
+#undo:disabled{opacity:.4}
+:root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+html.native{--sat:max(env(safe-area-inset-top,0px),38px);--sab:max(env(safe-area-inset-bottom,0px),26px)}
+.leaflet-top{top:calc(var(--sat) + 58px)}
+.leaflet-bottom{bottom:var(--sab)}
+#err{position:fixed;left:8px;right:8px;top:calc(var(--sat) + 60px);z-index:4000;background:#b42318;color:#fff;padding:10px 12px;border-radius:12px;font-size:13px}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="top"><button id="menuBtn" type="button" hidden aria-label="Agrandir ou réduire le menu" title="Agrandir / réduire le menu">☰</button><button id="helpBtn" type="button" aria-label="Aide">?</button><button id="adminBtn" type="button">Admin</button></div>
+<div id="status"><i></i><span id="stxt">Recherche de ta position…</span></div>
+<div id="fabs">
+  <button class="fab" id="layBtn" type="button" aria-label="Plan ou satellite" title="Plan / satellite">🛰</button>
+  <button class="fab" id="fitBtn" type="button" aria-label="Voir toute la zone" title="Voir toute la zone">⤢</button>
+  <button class="fab" id="locBtn" type="button" aria-label="Me retrouver" title="Me retrouver">◎</button>
+</div>
+
+<section id="panel" aria-label="Réglages administrateur">
+  <div class="phead"><h2>Préparer la partie</h2><span class="hb"><button class="b sm main2" id="okQuick" type="button">Valider</button><button class="b sm" id="fold" type="button">Réduire</button></span></div>
+  <div id="pbody">
+    <div class="seg" id="seg"><span>Menu :</span><button class="b sm" data-p="bottom" type="button">Bas</button><button class="b sm" data-p="top" type="button">Haut</button><button class="b sm" data-p="left" type="button">Gauche</button><button class="b sm" data-p="right" type="button">Droite</button></div>
+    <label class="chk"><input type="checkbox" id="aView"><span><b>Voir tout le monde</b><small>Comme un visiteur : joueurs en bleu, admins de terrain en jaune, admins virtuels en rose, visiteurs en gris.</small></span></label>
+    <div class="step"><span class="n">1</span><div><strong>Place la zone</strong><p class="hint">Glisse la poignée orange pour déplacer le carré, puis règle sa taille.</p></div></div>
+    <div class="row"><label for="w">Largeur</label><input id="w" type="range" min="100" max="3000" step="50"><output id="wo"></output></div>
+    <div class="row"><label for="h">Hauteur</label><input id="h" type="range" min="100" max="3000" step="50"><output id="ho"></output></div>
+    <div class="step"><span class="n">2</span><div><strong>Cercles de cachette</strong><p class="hint" id="hint">Ajoute un ou plusieurs cercles, puis déplace-les avec leur poignée rouge numérotée. Touche un cercle pour le déplacer ou le supprimer.</p></div></div>
+    <div id="clist" class="clist"></div>
+    <div class="row"><label for="r" id="rLab">Rayon des nouveaux cercles</label><input id="r" type="range" min="20" max="500" step="10"><output id="ro"></output></div>
+    <label class="chk"><input type="checkbox" id="vis" checked> Montrer les cercles aux joueurs</label>
+    <div class="btns"><button class="b" id="place" type="button">Ajouter un cercle</button><button class="b" id="undo" type="button">↶ Annuler</button><button class="b warn" id="clear" type="button">Tout supprimer</button></div>
+    <details class="bonus"><summary>Bonus (facultatif)</summary>
+      <p class="hint">Des options en plus pour pimenter la partie. Coche-en une pour voir ses réglages.</p>
+      <div class="seg"><span id="roleTxt"></span><button class="b sm" id="roleBtn" type="button">Changer</button></div>
+      <div class="bo"><label class="chk"><input type="checkbox" id="bTrack"><span><b>Suivi de l’admin de terrain</b><small>Toujours actif : l’admin virtuel voit en permanence le point jaune de l’admin de terrain.</small></span></label>
+        <div class="opt" id="oTrack" hidden><p class="st" id="stTrack"></p><p class="hint">Le téléphone de terrain doit garder la page (ou l’appli) ouverte.</p></div></div>
+      <div class="bo"><label class="chk"><input type="checkbox" id="bAuto"><span><b>Cercle automatique</b><small>Crée un cercle par admin de terrain, au hasard autour de sa cachette (jamais pile dessus). Tu peux ensuite les déplacer ou les supprimer.</small></span></label>
+        <div class="opt" id="oAuto" hidden><p class="st" id="stAuto"></p><button class="b" id="genC" type="button">Générer le cercle</button></div></div>
+      <div class="bo"><label class="chk"><input type="checkbox" id="bTimer"><span><b>Minuteur</b><small>Un compte à rebours affiché chez tous les joueurs.</small></span></label>
+        <div class="opt" id="oTimer" hidden><p class="st" id="stTimer"></p><div class="inl"><input type="number" id="tMin" value="30" min="1"> min <button class="b sm" id="tGo" type="button">Lancer</button><button class="b sm warn" id="tStop" type="button">Arrêter</button></div></div></div>
+      <div class="bo"><label class="chk"><input type="checkbox" id="bBattle"><span><b>Bataille finale</b><small>Un très grand cercle collé à l’admin de terrain, qui rétrécit sans arrêt. À ce moment-là, tous les joueurs voient sa position (point jaune).</small></span></label>
+        <div class="opt" id="oBattle" hidden><p class="st" id="stBattle"></p><div class="inl">durée <input type="number" id="bDur" value="10" min="1"> min, rayon final <input type="number" id="bR1" value="30" min="10"> m</div><div class="inl"><button class="b sm" id="bGo" type="button">Lancer</button><button class="b sm warn" id="bStop" type="button">Arrêter</button></div></div></div>
+    </details>
+    <div class="step"><span class="n">3</span><div><strong>Valide</strong><p class="hint">Les joueurs voient le changement en quelques secondes.</p></div></div>
+    <button class="b main" id="ok" type="button">Valider et envoyer</button>
+    <button class="b warn" id="logout" type="button" style="width:100%;margin-top:10px">Se déconnecter</button>
+    <div id="share" hidden>
+      <p class="hint" id="hint2"></p>
+      <input id="link" readonly>
+      <div class="btns"><button class="b" id="copy" type="button">Copier le lien</button></div>
+    </div>
+  </div>
+</section>
+
+<div id="ghostBar"><span id="gtxt"></span><button class="b sm" id="gcancel" type="button">Annuler</button></div>
+<div id="timer" hidden></div>
+<div id="toast" role="status"></div>
+<section id="vpanel" hidden aria-label="Mode visiteur">
+  <div class="phead"><h2>Mode visiteur</h2><button class="b sm" id="vClose" type="button">Fermer</button></div>
+  <p class="hint">Tu vois tout le monde en direct : <b>jaune</b> admins de terrain, <b>rose</b> admins virtuels, <b>bleu</b> joueurs, <b>gris</b> visiteurs (toi aussi, en gris).</p>
+  <p class="st" id="vStat"></p>
+  <div class="btns"><button class="b warn" id="vQuit" type="button">Se déconnecter</button></div>
+</section>
+<div id="consent" role="dialog" aria-labelledby="ctt" hidden>
+  <b id="ctt">Partager ta position ?</b>
+  <span>L’admin virtuel doit voir ta position (point jaune) pour gérer la partie. Seuls les admins la voient, et tous les joueurs pendant la bataille finale.</span>
+  <div class="btns"><button class="b main2" id="cYes" type="button">Oui, partager</button><button class="b" id="cNo" type="button">Non</button></div>
+</div>
+<div class="veil" id="helpV"><div class="card" role="dialog" aria-labelledby="ht">
+  <img class="logo" src="logo.svg" alt="" width="72" height="72">
+  <h2 id="ht">Loup géant</h2>
+  <p class="sub">Retrouve la cachette dans la zone de jeu.</p>
+  <div class="leg"><span class="sw blue"></span><span>Ce point bleu, c’est toi. Les autres joueurs ne le voient pas.</span></div>
+  <div class="leg"><span class="sw red"></span><span>Le cercle rouge montre où la personne se cache, à peu près.</span></div>
+  <div class="leg"><span class="sw green"></span><span>Le trait vert marque la limite de la zone de jeu.</span></div>
+  <div class="leg"><span class="sw grey"></span><span>Le gris, c’est hors jeu.</span></div>
+  <p class="hint">Pince l’écran pour zoomer. Le bouton ⤢ montre toute la zone, ◎ te ramène sur ta position. Autorise la localisation quand le téléphone te le demande.</p>
+  <p class="hint">Couleurs sur la carte : <b>bleu</b> joueur, <b>jaune</b> admin de terrain, <b>rose</b> admin virtuel, <b>gris</b> visiteur.</p>
+  <label class="pseudo">Ton pseudo<span class="pr"><input id="pseudo" maxlength="16" autocomplete="nickname" placeholder="ex : Louna"><button class="b sm main2" id="pseudoOk" type="button">OK</button></span></label>
+  <p class="hint" id="pseudoMsg">Il s’affiche à côté de ton point. Deux personnes ne peuvent pas avoir le même pseudo.</p>
+  <label class="chk"><input type="checkbox" id="shareChk" checked><span><b>Partager ma position</b><small>Visible des visiteurs et des admins qui suivent.</small></span></label>
+  <button class="b main" id="helpOk" type="button">C’est parti</button>
+</div></div>
+<div class="veil" id="pinV"><div class="card" role="dialog" aria-labelledby="pt">
+  <h2 id="pt">Mode administrateur</h2>
+  <p class="sub">Entre ton code (admin ou visiteur).</p>
+  <input id="pin" type="password" autocomplete="off" autocapitalize="characters" aria-label="Code administrateur">
+  <label class="chk"><input type="checkbox" id="pinField"> Je suis l’admin de terrain (je me cache)</label>
+  <p class="hint">Sans la case : admin virtuel, qui gère à distance. Le code visiteur ignore cette case.</p>
+  <button class="b main" id="pinOk" type="button">Ouvrir</button>
+  <button class="b" id="pinNo" type="button" style="width:100%;margin-top:8px">Annuler</button>
+</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// Le code admin n’est plus écrit en clair : seule son empreinte est ici
+const SALT = "lg-6e437d03c7a6ede2", PIN_HASH = "9b24904a8e6ff277baa0b17535db7d0463faaf97f60eccce30e449a784c17047";
+const VSALT = "lg-1d3fbdb585c91435", VISIT_HASH = "720b4181ac19147f3a21b9004823ead760d490c693151656ff0f2bd88cc1c4cc";
+async function hashCode(v, salt = SALT) {
+  const n = v.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(n), "PBKDF2", false, ["deriveBits"]);
+  const b = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations: 150000, hash: "SHA-256" }, k, 256);
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+}
+// Adresse de ta base Firebase, sans / à la fin. Laisse vide pour le mode « lien » seul.
+const DB = "https://chasse-a-l-homme-22573-default-rtdb.europe-west1.firebasedatabase.app";
+// Marge autour de la zone, en proportion de sa taille (1.0 = une zone entière de chaque côté)
+const MARGIN = 1.0;
+const DBU = DB.replace(/\/$/, "");
+
+const $ = id => document.getElementById(id);
+const NATIVE = !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
+if (NATIVE) document.documentElement.classList.add("native");
+function showErr(m) {
+  let b = document.getElementById("err");
+  if (!b) { b = document.createElement("div"); b.id = "err"; b.onclick = () => b.remove(); document.body.appendChild(b); }
+  b.textContent = "Erreur : " + m + " (touche pour fermer)";
+}
+addEventListener("error", e => showErr(e.message));
+addEventListener("unhandledrejection", e => showErr((e.reason && e.reason.message) || e.reason));
+const show = id => $(id).classList.add("show"), hide = id => $(id).classList.remove("show");
+let tt;
+function toast(t) { const e = $("toast"); e.textContent = t; e.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => e.classList.remove("show"), 2600); }
+function setFold(b) { $("panel").classList.toggle("fold", b); $("fold").textContent = b ? "Agrandir" : "Réduire"; }
+let visErr = "", follow = false, visCount = 0, gpsErrMsg = "", role = null, posData = null, hiderMk = null, lastPush = 0, bCenter = null, bRad = 0, lastPos = null, lastAcc = 0, ch = null, selfPush = false, cfg = null, fromLink = false, admin = false, placing = false, handle = null;
+
+try {
+  const m = location.hash.match(/z=([^&]+)/);
+  if (m) { cfg = JSON.parse(atob(decodeURIComponent(m[1]))); fromLink = true; }
+} catch (e) { cfg = null; }
+if (!cfg) cfg = { c: [47.1667, -1.4667], w: 800, h: 800, ci: null, r: 80 };
+
+const map = L.map("map", { zoomSnap: 0.25, zoomDelta: 0.5, zoomControl: false, maxZoom: 19 }).setView(cfg.c, 15);
+L.control.zoom({ position: "topleft" }).addTo(map);
+// Fonds de carte sans clé d’API : OpenStreetMap, avec Esri en secours et en vue satellite
+const plan = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" });
+const rues = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: "© Esri" });
+const sat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: "© Esri" });
+let base = plan.addTo(map), errs = 0;
+plan.on("tileerror", () => { if (++errs === 6 && base === plan) { map.removeLayer(plan); base = rues.addTo(map); toast("Fond de carte de secours activé"); } });
+
+const world = [[-85, -180], [-85, 180], [85, 180], [85, -180]];
+const mask = L.polygon([world, world], { stroke: false, fillColor: "#7d838c", fillOpacity: .6, interactive: false }).addTo(map);
+const casing = L.rectangle([[0, 0], [1, 1]], { color: "#fff", weight: 9, opacity: .95, fill: false, interactive: false }).addTo(map);
+const rect = L.rectangle([[0, 0], [1, 1]], { color: "#1f7a54", weight: 4, fill: false, interactive: false }).addTo(map);
+let moveId = "", selId = "", undoStack = [];
+const circs = {}, chs = {};
+
+function zoneBounds() {
+  const dLat = cfg.h / 2 / 111320;
+  const dLng = cfg.w / 2 / (111320 * Math.cos(cfg.c[0] * Math.PI / 180));
+  return L.latLngBounds([cfg.c[0] - dLat, cfg.c[1] - dLng], [cfg.c[0] + dLat, cfg.c[1] + dLng]);
+}
+
+function draw() {
+  const b = zoneBounds();
+  rect.setBounds(b); casing.setBounds(b);
+  mask.setLatLngs([world, [b.getSouthWest(), b.getNorthWest(), b.getNorthEast(), b.getSouthEast()]]);
+  syncCircles(cfg.show === false);
+  $("wo").textContent = cfg.w + " m";
+  $("ho").textContent = cfg.h + " m";
+  syncRad();
+  updateStatus();
+}
+
+// ---- Cercles : plusieurs cercles, sélection, annulation ----
+function CS() {
+  if (cfg.ci && !cfg.circles) cfg.circles = [{ id: "c0", c: cfg.ci, r: cfg.r || 80, o: "", n: "" }];
+  cfg.ci = null;
+  if (cfg.circles && !Array.isArray(cfg.circles)) cfg.circles = Object.values(cfg.circles);
+  return cfg.circles || (cfg.circles = []);
+}
+function newId() { return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+function labelOf(c, i) { return "Cercle " + (i + 1) + (c.n ? " · " + c.n : c.o ? " · auto" : ""); }
+function snap() { undoStack.push(JSON.stringify(CS())); if (undoStack.length > 10) undoStack.shift(); }
+function undo() {
+  if (!undoStack.length) { toast("Rien à annuler"); return; }
+  cfg.circles = JSON.parse(undoStack.pop());
+  if (!CS().some(c => c.id === selId)) selId = "";
+  draw(); renderList(); toast("Annulé");
+}
+function addCircle(ll) {
+  snap();
+  const c = { id: newId(), c: [ll[0], ll[1]], r: cfg.r || 80, o: "", n: "" };
+  CS().push(c); selId = c.id;
+  return c;
+}
+function removeCircle(id) { snap(); cfg.circles = CS().filter(c => c.id !== id); if (selId === id) selId = ""; }
+
+function syncCircles(hid) {
+  const list = CS(), live = {}, show = !battleActive(cfg) && (admin || !hid);
+  list.forEach((c, i) => {
+    if (!show) return;
+    live[c.id] = 1;
+    let lc = circs[c.id];
+    if (!lc) {
+      lc = circs[c.id] = L.circle(c.c, { radius: c.r, color: "#e03131", weight: 3, dashArray: "10 7", fillColor: "#e03131", fillOpacity: .2, interactive: true, bubblingMouseEvents: true }).addTo(map);
+      const id = c.id;
+      lc.on("click", () => circleMenu(id));
+    }
+    const sel = admin && c.id === selId;
+    lc.setLatLng(c.c).setRadius(c.r);
+    lc.setStyle({ opacity: hid ? .45 : 1, fillOpacity: hid ? .06 : sel ? .32 : .2, weight: sel ? 5 : 3 });
+    setLabel(lc, admin ? labelOf(c, i) : "");
+  });
+  for (const id in circs) if (!live[id]) { map.removeLayer(circs[id]); delete circs[id]; }
+  syncHandles();
+}
+// Poignées rouges numérotées : déplacer chaque cercle à la main (admin)
+function syncHandles() {
+  const list = CS(), want = {};
+  if (admin) list.forEach((c, i) => {
+    want[c.id] = 1;
+    const sel = c.id === selId, key = (i + 1) + (sel ? "s" : ""), id = c.id;
+    const icon = () => L.divIcon({ className: "", html: '<div class="chandle' + (sel ? " sel" : "") + '">' + (i + 1) + "</div>", iconSize: [38, 38], iconAnchor: [19, 19] });
+    let m = chs[id];
+    if (!m) {
+      m = chs[id] = L.marker(c.c, { draggable: true, zIndexOffset: 900, icon: icon() }).addTo(map);
+      m._k = key;
+      m.on("dragstart", () => { snap(); selId = id; });
+      m.on("drag", e => { const q = e.target.getLatLng(), cc = CS().find(x => x.id === id); if (cc) { cc.c = [q.lat, q.lng]; if (circs[id]) circs[id].setLatLng(cc.c); } });
+      m.on("dragend", () => { draw(); renderList(); });
+      m.on("click", () => circleMenu(id));
+    } else {
+      m.setLatLng(c.c);
+      if (m._k !== key) { m.setIcon(icon()); m._k = key; }
+    }
+  });
+  for (const id in chs) if (!want[id]) { map.removeLayer(chs[id]); delete chs[id]; }
+}
+// Liste des cercles dans le menu
+function syncRad() {
+  const c = CS().find(x => x.id === selId), v = c ? c.r : (cfg.r || 80);
+  $("r").value = v; $("ro").textContent = v + " m";
+  $("rLab").textContent = c ? "Rayon du cercle " + (CS().indexOf(c) + 1) : "Rayon des nouveaux cercles";
+}
+function renderList() {
+  const box = $("clist"), list = CS();
+  box.innerHTML = "";
+  if (!list.length) { const p = document.createElement("p"); p.className = "hint"; p.textContent = "Aucun cercle pour l’instant."; box.appendChild(p); }
+  list.forEach((c, i) => {
+    const row = document.createElement("div");
+    row.className = "crow" + (c.id === selId ? " sel" : "");
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "cname"; b.textContent = labelOf(c, i) + " · " + c.r + " m";
+    b.onclick = () => { selId = c.id; draw(); renderList(); map.panTo(c.c); };
+    const x = document.createElement("button");
+    x.type = "button"; x.className = "cx"; x.setAttribute("aria-label", "Supprimer ce cercle"); x.textContent = "✕";
+    x.onclick = () => { removeCircle(c.id); draw(); renderList(); flash(); toast("Cercle supprimé · tu peux annuler"); };
+    row.append(b, x); box.appendChild(row);
+  });
+  $("undo").disabled = !undoStack.length;
+  syncRad();
+}
+
+// Texte d’état : distance au cercle, ou hors zone
+function updateStatus() {
+  if (role === "virtuel") {
+    let vt, vbad = false;
+    if (posData) { const sc = Math.round((Date.now() - posData.t) / 1000); vt = "Point jaune : " + (sc < 15 ? "admin de terrain en direct" : "dernière position il y a " + (sc < 120 ? sc + " s" : Math.round(sc / 60) + " min")); vbad = sc >= 30; }
+    else { vt = "Point jaune : en attente de l’admin de terrain (il doit accepter le partage)"; vbad = true; }
+    $("stxt").textContent = vt; $("status").classList.toggle("warn", vbad); return;
+  }
+  let t = "Recherche de ta position…", bad = false;
+  if (lastPos) {
+    const here = L.latLng(lastPos);
+    t = "Ta position · précision ~" + Math.round(lastAcc) + " m";
+    if (!zoneBounds().contains(here)) t = "Tu es hors de la zone de jeu";
+    else if (curTarget()) {
+      const tg = curTarget(); const d = here.distanceTo(L.latLng(tg.c)) - tg.r;
+      const many = (tg.n || 1) > 1;
+      t = d <= 0 ? (many ? "Tu es dans un cercle" : "Tu es dans le cercle") : (many ? "Cercle le plus proche à " : "Cercle à ") + (d >= 1000 ? (d / 1000).toFixed(1) + " km" : Math.round(d) + " m");
+    }
+  } else if (gpsErrMsg) { t = gpsErrMsg; bad = true; }
+  if (role === "terrain") {
+    if (consent === "yes") { t += " · " + (shareMsg || "partage en cours…"); bad = bad || shareErr; }
+    else { t += " · partage non accepté (touche ici pour accepter)"; bad = true; }
+  } else if (myShare() && shareErr) { t += " · partage : " + shareMsg; bad = true; }
+  $("stxt").textContent = t;
+  $("status").classList.toggle("warn", bad);
+}
+
+// Joueurs : toute la zone visible avec une marge, zoom libre, impossible de sortir de la marge
+function lockPlayer() {
+  if (role) { map.setMaxBounds(null); map.setMinZoom(3); map.fitBounds(zoneBounds().pad(0.2), { animate: false }); return; }
+  const area = areaBounds();
+  map.setMaxBounds(null);
+  map.setMinZoom(0);
+  map.fitBounds(area, { animate: false });
+  map.setMinZoom(map.getZoom());
+  map.options.maxBoundsViscosity = 1;
+  map.setMaxBounds(area);
+  map.fitBounds(zoneBounds().pad(0.2), { animate: false });
+}
+function unlockAdmin() { map.setMaxBounds(null); map.setMinZoom(3); }
+function fitZone() { map.fitBounds(zoneBounds().pad(0.2), { animate: true }); }
+
+// Position personnelle (visible uniquement par la personne elle-même)
+const me = L.marker([0, 0], { icon: L.divIcon({ className: "", html: '<div class="me"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }), interactive: false, keyboard: false });
+const acc = L.circle([0, 0], { radius: 1, color: "#2563eb", weight: 2, fillColor: "#2563eb", fillOpacity: 0, interactive: false });
+let firstFix = true;
+// Dans l’appli Android, la position continue d’arriver écran éteint (service de premier plan)
+function nativeWatch(cb, errcb) {
+  const BG = Capacitor.registerPlugin("BackgroundGeolocation");
+  BG.addWatcher({ backgroundTitle: "📍 Loup géant : position partagée", backgroundMessage: "Touche pour revenir dans l’appli", requestPermissions: true, stale: false, distanceFilter: 1 },
+    (loc, err) => {
+      if (err) {
+        if (err.code === "NOT_AUTHORIZED" && confirm("Autorise la localisation « Tout le temps » dans les réglages de l’appli.")) BG.openSettings();
+        errcb(err); return;
+      }
+      cb({ coords: { latitude: loc.latitude, longitude: loc.longitude, accuracy: loc.accuracy } });
+    }).catch(errcb);
+}
+const watchPos = NATIVE ? (cb, errcb, opts) => {
+  try { nativeWatch(cb, errcb); } catch (e) { errcb(e); }
+  try { if (navigator.geolocation) navigator.geolocation.watchPosition(cb, () => {}, opts); } catch (e) {}
+} : (cb, errcb, opts) => navigator.geolocation.watchPosition(cb, errcb, opts);
+let gpsOn = false;
+function startGps() {
+  if (gpsOn) return;
+  gpsOn = true;
+  if (NATIVE || "geolocation" in navigator) {
+  watchPos(p => {
+    const ll = [p.coords.latitude, p.coords.longitude];
+    me.setLatLng(ll); acc.setLatLng(ll); acc.setStyle(ROLEC());
+    if (!map.hasLayer(me)) { acc.addTo(map); me.addTo(map); }
+    gpsErrMsg = ""; lastPos = ll; lastAcc = p.coords.accuracy; updateStatus();
+    if (firstFix && !fromLink) { cfg.c = ll; draw(); map.setView(ll, 16); }
+    else if (firstFix && role === "terrain") map.setView(ll, Math.max(map.getZoom(), 16));
+    firstFix = false;
+  }, () => { gpsOn = false; gpsErrMsg = "Position indisponible : autorise la localisation."; updateStatus(); },
+  { enableHighAccuracy: true, maximumAge: 2000 });
+  } else {
+    $("stxt").textContent = "La géolocalisation n’est pas disponible.";
+  }
+}
+startGps();
+
+$("fitBtn").onclick = () => admin ? map.fitBounds(zoneBounds().pad(0.3)) : fitZone();
+$("locBtn").onclick = () => { if (map.hasLayer(me)) map.setView(me.getLatLng(), Math.max(map.getZoom(), 17)); };
+
+function enterAdmin() {
+  admin = true;
+  setFold(false);
+  $("share").hidden = true;
+  $("panel").style.display = "block";
+  $("fabs").style.display = "none";
+  setAdminLabel();
+  $("w").value = cfg.w; $("h").value = cfg.h; $("r").value = cfg.r || 80; $("vis").checked = cfg.show !== false;
+  loadBonus(); updateRole(); $("aView").checked = viewAll; selId = ""; renderList();
+  unlockAdmin();
+  map.fitBounds(zoneBounds().pad(0.3), { animate: false });
+  handle = L.marker(cfg.c, {
+    draggable: true,
+    icon: L.divIcon({ className: "", html: '<div class="handle">✥</div>', iconSize: [38, 38], iconAnchor: [19, 19] })
+  }).addTo(map);
+  handle.on("drag", e => { const p = e.target.getLatLng(); cfg.c = [p.lat, p.lng]; draw(); });
+  draw();
+}
+
+function exitAdmin() {
+  admin = false;
+  endPlacing();
+  draw();
+  $("place").classList.remove("on");
+  if (handle) { map.removeLayer(handle); handle = null; }
+  $("fabs").style.display = "flex";
+  setAdminLabel();
+}
+
+$("adminBtn").onclick = () => {
+  if (admin) return;
+  if (role === "visiteur") { $("vpanel").hidden = !$("vpanel").hidden; return; }
+  if (role) { enterAdmin(); return; }
+  $("pin").value = "";
+  show("pinV");
+  setTimeout(() => $("pin").focus(), 60);
+};
+$("pinOk").onclick = async () => {
+  let kind = "";
+  try {
+    const v = $("pin").value;
+    if ((await hashCode(v, SALT)) === PIN_HASH) kind = "admin";
+    else if ((await hashCode(v, VSALT)) === VISIT_HASH) kind = "visit";
+  } catch (e) { toast("Ouvre le site en https"); return; }
+  if (!kind) { await new Promise(r => setTimeout(r, 1000)); toast("Code incorrect"); $("pin").value = ""; return; }
+  role = kind === "visit" ? "visiteur" : ($("pinField").checked ? "terrain" : "virtuel");
+  try { sessionStorage.setItem("lg_role", role); } catch (e) {}
+  hide("pinV");
+  setAdminLabel();
+  if (kind === "visit") { unlockAdmin(); openVisitor(); } else enterAdmin();
+};
+$("pinNo").onclick = () => hide("pinV");
+$("pin").onkeydown = e => { if (e.key === "Enter") $("pinOk").click(); };
+$("fold").onclick = () => setFold(!$("panel").classList.contains("fold"));
+
+// Aide : affichée à la première visite, puis avec le bouton ?
+let seen = false;
+try { seen = localStorage.getItem("lg_seen") === "1"; } catch (e) {}
+if (!seen) show("helpV");
+$("helpBtn").onclick = () => show("helpV");
+$("helpOk").onclick = () => { hide("helpV"); try { localStorage.setItem("lg_seen", "1"); } catch (e) {} };
+
+$("w").oninput = e => { cfg.w = +e.target.value; draw(); };
+$("h").oninput = e => { cfg.h = +e.target.value; draw(); };
+$("r").oninput = e => {
+  const v = +e.target.value, c = CS().find(x => x.id === selId);
+  if (c) c.r = v; else cfg.r = v;
+  draw(); renderList();
+};
+$("vis").onchange = e => { cfg.show = e.target.checked; draw(); };
+
+$("place").onclick = () => startPlacing("Touche la carte pour ajouter un cercle");
+$("undo").onclick = undo;
+$("clear").onclick = () => {
+  if (!CS().length) return;
+  snap(); cfg.circles = []; selId = "";
+  draw(); renderList(); flash(); toast("Tous les cercles supprimés · tu peux annuler");
+};
+
+map.on("click", e => {
+  if (!admin || !placing) return;
+  const ll = [e.latlng.lat, e.latlng.lng];
+  if (moveId) {
+    snap();
+    const c = CS().find(x => x.id === moveId);
+    if (c) c.c = ll;
+    selId = moveId; toast("Cercle déplacé");
+  } else { addCircle(ll); toast("Cercle " + CS().length + " ajouté"); }
+  endPlacing(); draw(); renderList();
+});
+
+$("ok").onclick = () => {
+  exitAdmin();
+  lockPlayer();
+  const link = location.href.split("#")[0] + "#z=" + encodeURIComponent(btoa(JSON.stringify(cfg)));
+  history.replaceState(null, "", link);
+  $("link").value = link;
+  $("share").hidden = false;
+  if (DB) {
+    $("hint2").textContent = "Envoi aux joueurs…";
+    fetch(DB.replace(/\/$/, "") + "/state.json", { method: "PUT", body: JSON.stringify(Object.assign({}, cfg, { t: Date.now() })) })
+      .then(r => { if (r.ok) { selfPush = true; toast("Envoyé aux joueurs ✓"); } $("hint2").textContent = r.ok ? "Envoyé : les joueurs se mettent à jour tout seuls. Lien de secours :" : "Échec de l’envoi : vérifie les règles Firebase. Lien de secours :"; })
+      .catch(() => { $("hint2").textContent = "Pas de connexion. Lien de secours :"; });
+  } else {
+    $("hint2").textContent = "Envoie ce lien aux joueurs :";
+  }
+};
+
+$("copy").onclick = async () => {
+  try { await navigator.clipboard.writeText($("link").value); $("copy").textContent = "Lien copié"; }
+  catch (e) { $("link").select(); }
+  setTimeout(() => { $("panel").style.display = "none"; $("copy").textContent = "Copier le lien"; }, 900);
+};
+
+// Mise à jour automatique : les joueurs relisent la zone et le cercle toutes les 5 s
+let lastKey = "", firstPull = true;
+async function pull() {
+  if (!DB || admin) return;
+  try {
+    const r = await fetch(DB.replace(/\/$/, "") + "/state.json", { cache: "no-store" });
+    const s = await r.json();
+    if (!s || !s.c) return;
+    const key = JSON.stringify(s);
+    if (key === lastKey) return;
+    const geo = JSON.stringify([s.c, s.w, s.h]) !== JSON.stringify([cfg.c, cfg.w, cfg.h]);
+    lastKey = key; cfg = s; fromLink = true;
+    draw();
+    if (geo || firstPull) lockPlayer();
+    if (!firstPull && !selfPush) toast("L’organisateur a mis à jour la zone");
+    selfPush = false;
+    firstPull = false;
+  } catch (e) {}
+}
+
+try { role = sessionStorage.getItem("lg_role"); } catch (e) {}
+setAdminLabel();
+
+function battleActive(c) { return !!(c && c.battle && c.battle.on); }
+function battleRadius(b) { return b.r0 + (b.r1 - b.r0) * Math.min(1, Math.max(0, (Date.now() - b.start) / b.dur)); }
+function curTarget() {
+  if (battleActive(cfg) && bCenter) return { c: bCenter, r: bRad };
+  if (cfg.show === false) return null;
+  const list = CS();
+  if (!list.length) return null;
+  let best = list[0], bd = Infinity;
+  if (lastPos) for (const c of list) { const d = L.latLng(lastPos).distanceTo(L.latLng(c.c)) - c.r; if (d < bd) { bd = d; best = c; } }
+  return { c: best.c, r: best.r, n: list.length };
+}
+const bc = L.circle([0, 0], { radius: 1, color: "#c2410c", weight: 4, fillColor: "#c2410c", fillOpacity: .12, interactive: false });
+const pad2 = n => String(n).padStart(2, "0");
+
+function tick() {
+  const t = $("timer");
+  if (cfg.timer && cfg.timer.end) {
+    const rem = cfg.timer.end - Date.now();
+    t.hidden = false;
+    t.textContent = rem > 0 ? pad2(Math.floor(rem / 60000)) + ":" + pad2(Math.floor(rem / 1000) % 60) : "Temps écoulé";
+  } else t.hidden = true;
+  if (battleActive(cfg)) {
+    bRad = battleRadius(cfg.battle);
+    const pts = {};
+    for (const k in hiders) pts[k] = [hiders[k].lat, hiders[k].lng];
+    if (role === "terrain" && lastPos) pts[pid] = lastPos;
+    for (const k in bcs) if (!pts[k]) { map.removeLayer(bcs[k]); delete bcs[k]; }
+    let first = null;
+    for (const k in pts) {
+      if (!bcs[k]) bcs[k] = L.circle(pts[k], { radius: 1, color: "#c2410c", weight: 4, fillColor: "#c2410c", fillOpacity: .12, interactive: false }).addTo(map);
+      bcs[k].setLatLng(pts[k]).setRadius(bRad);
+      first = first || pts[k];
+    }
+    bCenter = first;
+    if (first) updateStatus();
+  } else { bCenter = null; for (const k in bcs) { map.removeLayer(bcs[k]); delete bcs[k]; } }
+  document.documentElement.classList.toggle("isTerrain", role === "terrain");
+  document.documentElement.classList.toggle("isVirtuel", role === "virtuel");
+  document.documentElement.classList.toggle("isVisit", role === "visiteur");
+  $("menuBtn").hidden = !(role === "terrain" || role === "virtuel");
+  if (role) updateStatus();
+  if (role === "visiteur") $("vStat").textContent = visStatus();
+  if (admin) bonusStatus();
+  consentCheck();
+}
+setInterval(tick, 1000);
+
+
+function pushState() {
+  if (!DB) { toast("Base Firebase non configurée"); return; }
+  selfPush = true;
+  fetch(DBU + "/state.json", { method: "PUT", body: JSON.stringify(Object.assign({}, cfg, { t: Date.now() })) })
+    .then(r => toast(r.ok ? "Envoyé aux joueurs ✓" : "Échec de l’envoi")).catch(() => toast("Pas de connexion"));
+}
+
+const BON = { bTrack: ["track", "oTrack"], bAuto: ["auto", "oAuto"], bTimer: ["timer", "oTimer"], bBattle: ["battle", "oBattle"] };
+function loadBonus() {
+  const b = cfg.bonus || {};
+  for (const id in BON) { $(id).checked = !!b[BON[id][0]]; $(BON[id][1]).hidden = !$(id).checked; }
+  $("bTrack").checked = true; $("bTrack").disabled = true; $("oTrack").hidden = false;
+}
+for (const id in BON) $(id).onchange = e => {
+  cfg.bonus = cfg.bonus || {};
+  cfg.bonus[BON[id][0]] = e.target.checked;
+  if (role === "terrain" && e.target.checked && (id === "bTrack" || id === "bAuto")) saveConsent("yes");
+  $(BON[id][1]).hidden = !e.target.checked;
+  if (id === "bAuto" && e.target.checked && !cfg.bonus.track) {
+    cfg.bonus.track = true; $("bTrack").checked = true; $("oTrack").hidden = false;
+    toast("Suivi activé aussi : nécessaire pour le cercle automatique");
+  }
+};
+// Cercles automatiques : un cercle par admin de terrain, la cachette dedans mais jamais au centre
+async function fieldAdmins() {
+  const out = {};
+  if (role === "terrain" && lastPos) out[pid] = { lat: lastPos[0], lng: lastPos[1], n: pseudo };
+  if (DB) {
+    try {
+      const all = (await (await fetch(DBU + "/players.json", { cache: "no-store" })).json()) || {};
+      const now = Date.now();
+      for (const k in all) { const p = all[k]; if (k !== pid && p && p.r === "t" && p.lat && now - p.t < 120000) out[k] = p; }
+    } catch (e) {}
+  }
+  return out;
+}
+function aroundHider(p, r) {
+  const z = zoneBounds(), here = L.latLng(p.lat, p.lng), kx = 111320 * Math.cos(p.lat * Math.PI / 180);
+  for (let i = 0; i < 40; i++) {
+    const d = r * (0.15 + 0.5 * Math.random()), a = Math.random() * 2 * Math.PI;
+    const ll = L.latLng(p.lat + d * Math.cos(a) / 111320, p.lng + d * Math.sin(a) / kx);
+    if ((!z.contains(here) || z.contains(ll)) && here.distanceTo(ll) <= r * 0.7) return [ll.lat, ll.lng];
+  }
+  const d = r * 0.3, a = Math.random() * 2 * Math.PI;
+  return [p.lat + d * Math.cos(a) / 111320, p.lng + d * Math.sin(a) / kx];
+}
+$("genC").onclick = async () => {
+  const fa = await fieldAdmins(), ids = Object.keys(fa);
+  if (!ids.length) { toast("Aucun admin de terrain trouvé : il doit être connecté, avoir accepté le partage et garder l’appli ouverte"); return; }
+  snap();
+  const list = CS(); let added = 0, moved = 0;
+  ids.forEach(k => {
+    const p = fa[k], ex = list.find(c => c.o === k), ll = aroundHider(p, ex ? ex.r : (cfg.r || 80));
+    if (ex) { ex.c = ll; if (p.n) ex.n = p.n; moved++; selId = ex.id; }
+    else { const c = { id: newId(), c: ll, r: cfg.r || 80, o: k, n: p.n || "" }; list.push(c); added++; selId = c.id; }
+  });
+  draw(); renderList();
+  toast(ids.length + " admin" + (ids.length > 1 ? "s" : "") + " de terrain : " + [added && added + " cercle" + (added > 1 ? "s" : "") + " créé" + (added > 1 ? "s" : ""), moved && moved + " régénéré" + (moved > 1 ? "s" : "")].filter(Boolean).join(", "));
+};
+$("tGo").onclick = () => { cfg.timer = { end: Date.now() + Math.max(1, +$("tMin").value || 1) * 60000 }; pushState(); };
+$("tStop").onclick = () => { cfg.timer = null; pushState(); };
+$("bGo").onclick = () => {
+  if (role === "terrain") saveConsent("yes");
+  cfg.bonus = cfg.bonus || {}; cfg.bonus.track = true; $("bTrack").checked = true;
+  cfg.battle = { on: true, start: Date.now(), dur: Math.max(1, +$("bDur").value || 1) * 60000, r0: Math.round(Math.hypot(cfg.w, cfg.h)), r1: Math.max(10, +$("bR1").value || 30) };
+  draw(); pushState();
+};
+$("bStop").onclick = () => { cfg.battle = null; draw(); pushState(); };
+
+
+// Carte au premier plan : le menu devient transparent le temps de poser ou de voir un changement
+function setGhost(b) { $("panel").classList.toggle("ghost", b); }
+let gt;
+function flash() { setGhost(true); clearTimeout(gt); gt = setTimeout(() => { if (!placing) setGhost(false); }, 1600); }
+function startPlacing(msg, id) { moveId = id || ""; placing = true; setGhost(true); $("gtxt").textContent = msg; $("ghostBar").classList.add("show"); $("place").classList.add("on"); }
+function endPlacing() { moveId = ""; placing = false; setGhost(false); $("ghostBar").classList.remove("show"); $("place").classList.remove("on"); }
+$("gcancel").onclick = endPlacing;
+
+// Un clic sur un cercle ouvre ses actions : déplacer ou supprimer
+function circleMenu(id) {
+  if (!admin || placing) return;
+  const c = CS().find(x => x.id === id);
+  if (!c) return;
+  selId = id; setFold(false); renderList(); draw();
+  const d = document.createElement("div");
+  d.innerHTML = '<div class="pm"><button class="b sm" data-a="mv" type="button">Déplacer</button><button class="b sm warn" data-a="rm" type="button">Supprimer</button></div>';
+  d.onclick = e => {
+    const a = e.target.dataset && e.target.dataset.a;
+    if (!a) return;
+    map.closePopup();
+    if (a === "mv") startPlacing("Touche la carte pour déplacer ce cercle", id);
+    else { removeCircle(id); draw(); renderList(); flash(); toast("Cercle supprimé · tu peux annuler"); }
+  };
+  L.popup({ closeButton: true, closeOnClick: false, offset: [0, -4] }).setLatLng(c.c).setContent(d).openOn(map);
+}
+
+// Emplacement du menu admin (mémorisé sur l’appareil)
+function setPos(p) {
+  ["bottom", "top", "left", "right"].forEach(x => $("panel").classList.toggle("p-" + x, x === p));
+  document.querySelectorAll("#seg button").forEach(b => b.classList.toggle("on", b.dataset.p === p));
+  try { localStorage.setItem("lg_pos", p); } catch (e) {}
+}
+document.querySelectorAll("#seg button").forEach(b => b.onclick = () => setPos(b.dataset.p));
+let savedPos = "bottom";
+try { savedPos = localStorage.getItem("lg_pos") || "bottom"; } catch (e) {}
+setPos(savedPos);
+
+function updateRole() { $("roleTxt").textContent = "Rôle : " + (role === "terrain" ? "admin de terrain (tu te caches)" : "admin virtuel (tu gères à distance)"); }
+$("roleBtn").onclick = () => {
+  role = role === "terrain" ? "virtuel" : "terrain";
+  try { sessionStorage.setItem("lg_role", role); } catch (e) {}
+  updateRole(); setAdminLabel(); toast("Rôle changé : " + (role === "terrain" ? "admin de terrain" : "admin virtuel"));
+};
+function bonusStatus() {
+  const now = Date.now();
+  let t;
+  if (role === "terrain") t = consent !== "yes" ? "Tu n’as pas encore accepté de partager ta position." : (shareMsg || "En attente…");
+  else if (posData) { const s = Math.round((now - posData.t) / 1000); t = s < 15 ? "✓ Position reçue il y a " + s + " s." : "Dernière position il y a " + (s < 120 ? s + " s" : Math.round(s / 60) + " min") + " : le téléphone de terrain est-il ouvert ?"; }
+  else t = "En attente de la position de l’admin de terrain…";
+  $("stTrack").textContent = t;
+  const nc = CS().length;
+  $("stAuto").textContent = nc ? nc + " cercle" + (nc > 1 ? "s" : "") + " en place. Générer met à jour celui de chaque admin de terrain." : "Pas encore de cercle.";
+  if (cfg.timer && cfg.timer.end) { const r = cfg.timer.end - now; $("stTimer").textContent = r > 0 ? "En cours : " + Math.floor(r / 60000) + " min " + (Math.floor(r / 1000) % 60) + " s restantes." : "Terminé."; }
+  else $("stTimer").textContent = "Pas de minuteur actif.";
+  $("stBattle").textContent = battleActive(cfg) ? "En cours : rayon " + Math.round(bRad) + " m, jusqu’à " + cfg.battle.r1 + " m." : "Pas de bataille en cours.";
+}
+function areaBounds() {
+  const b = zoneBounds().pad(MARGIN), c = b.getCenter();
+  const dLat = Math.max(b.getNorth() - c.lat, 600 / 111320);
+  const dLng = Math.max(b.getEast() - c.lng, 600 / (111320 * Math.cos(c.lat * Math.PI / 180)));
+  return L.latLngBounds([c.lat - dLat, c.lng - dLng], [c.lat + dLat, c.lng + dLng]);
+}
+$("layBtn").onclick = () => { map.removeLayer(base); base = base === sat ? plan : sat; base.addTo(map); errs = 0; };
+
+// ============ Qui voit qui : rôles, couleurs, pseudos ============
+const isAdmin = () => role === "terrain" || role === "virtuel";
+let viewAll = false, shareOn = true, shareMsg = "", shareErr = false, consent = null, pseudo = "", myNameKey = "";
+try {
+  consent = sessionStorage.getItem("lg_consent");
+  viewAll = localStorage.getItem("lg_view") === "1";
+  shareOn = localStorage.getItem("lg_share") !== "0";
+  pseudo = localStorage.getItem("lg_pseudo") || "";
+  myNameKey = localStorage.getItem("lg_nk") || "";
+} catch (e) {}
+const pid = (() => {
+  let v = "";
+  try { v = localStorage.getItem("lg_pid") || ""; if (!v) { v = Math.random().toString(16).slice(2, 12); localStorage.setItem("lg_pid", v); } }
+  catch (e) { v = Math.random().toString(16).slice(2, 12); }
+  return v;
+})();
+const hiders = {}, peopleMks = {}, bcs = {};
+let people = {};
+const MY_R = () => role === "terrain" ? "t" : role === "virtuel" ? "v" : role === "visiteur" ? "s" : "j";
+const ROLEC = () => role === "terrain" ? { color: "#eab308", fillColor: "#facc15" } : role === "virtuel" ? { color: "#db2777", fillColor: "#ec4899" } : role === "visiteur" ? { color: "#6b7280", fillColor: "#9ca3af" } : { color: "#2563eb", fillColor: "#2563eb" };
+const seeAll = () => role === "visiteur" || (isAdmin() && viewAll);
+// Jaune = admin de terrain, rose = admin virtuel, bleu = joueur, gris = visiteur
+const canSee = r => seeAll() || (r === "t" && (role === "virtuel" || battleActive(cfg)));
+const MKHTML = { t: ['<div class="hider"></div>', 24], v: ['<div class="pk"></div>', 18], j: ['<div class="pl"></div>', 16], s: ['<div class="gr"></div>', 16] };
+
+function saveConsent(v) { consent = v; try { sessionStorage.setItem("lg_consent", v); } catch (e) {} }
+function consentCheck() { $("consent").hidden = !(role === "terrain" && !consent); }
+const myShare = () => role === "terrain" ? consent === "yes" : shareOn;
+$("cYes").onclick = () => { saveConsent("yes"); consentCheck(); startGps(); pushSelf(); toast("Partage de ta position activé ✓"); };
+$("cNo").onclick = () => { saveConsent("no"); consentCheck(); updateStatus(); toast("Partage refusé : le suivi reste désactivé"); };
+$("status").onclick = () => {
+  if (role === "terrain" && consent !== "yes") { saveConsent(""); consentCheck(); }
+  else if (role === "virtuel" && posData) map.setView([posData.lat, posData.lng], Math.max(map.getZoom(), 17));
+};
+
+// Ma position est envoyée toutes les 4 s (si j’ai accepté de la partager)
+function pushSelf() {
+  if (!DB || !myShare()) return;
+  if (!lastPos) { if (role === "terrain") { shareMsg = "en attente du GPS"; shareErr = true; } return; }
+  fetch(DBU + "/players/" + pid + ".json", { method: "PUT", body: JSON.stringify({ lat: lastPos[0], lng: lastPos[1], t: Date.now(), n: pseudo, r: MY_R() }) })
+    .then(r => { shareErr = !r.ok; shareMsg = r.ok ? "position partagée ✓" : "échec d’envoi (code " + r.status + ")"; })
+    .catch(() => { shareErr = true; shareMsg = "échec d’envoi : pas de connexion"; });
+}
+setInterval(pushSelf, 4000);
+function dropSelf() { if (DB) fetch(DBU + "/players/" + pid + ".json", { method: "DELETE", keepalive: true }).catch(() => {}); }
+addEventListener("pagehide", () => { if (role !== "terrain") dropSelf(); });
+
+// Je vois les autres selon mon rôle
+function clearPeople() {
+  for (const k in peopleMks) { map.removeLayer(peopleMks[k]); delete peopleMks[k]; }
+  for (const k in hiders) delete hiders[k];
+  people = {}; posData = null;
+}
+function setLabel(mk, name) {
+  if ((name || "") === (mk._nm || "")) return;
+  mk._nm = name || "";
+  mk.unbindTooltip();
+  if (name) { const el = document.createElement("span"); el.textContent = name; mk.bindTooltip(el, { permanent: true, direction: "top", offset: [0, -10], className: "nm" }); }
+}
+async function pollPeople() {
+  if (!DB) return;
+  if (!(seeAll() || role === "virtuel" || battleActive(cfg))) { clearPeople(); return; }
+  try {
+    const rs = await fetch(DBU + "/players.json", { cache: "no-store" });
+    if (!rs.ok) { visErr = "lecture impossible (code " + rs.status + ")"; return; }
+    visErr = "";
+    const all = (await rs.json()) || {};
+    const now = Date.now(); let latest = null;
+    const vis = {};
+    for (const k in hiders) delete hiders[k];
+    for (const k in all) {
+      const p = all[k], r = (p && p.r) || "j";
+      if (k === pid || !p || typeof p !== "object" || !p.lat) continue;
+      if (now - p.t > (r === "t" ? 600000 : 90000) || !canSee(r)) continue;
+      vis[k] = p;
+      if (r === "t") { hiders[k] = p; if (!latest || p.t > latest.t) latest = p; }
+    }
+    people = vis; posData = latest;
+    for (const k in peopleMks) if (!vis[k] || peopleMks[k]._r !== (vis[k].r || "j")) { map.removeLayer(peopleMks[k]); delete peopleMks[k]; }
+    for (const k in vis) {
+      const p = vis[k], r = p.r || "j", ll = [p.lat, p.lng];
+      if (peopleMks[k]) peopleMks[k].setLatLng(ll);
+      else {
+        const [h, sz] = MKHTML[r] || MKHTML.j;
+        peopleMks[k] = L.marker(ll, { icon: L.divIcon({ className: "", html: h, iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2] }), interactive: false, zIndexOffset: r === "t" ? 800 : 500 }).addTo(map);
+        peopleMks[k]._r = r;
+      }
+      setLabel(peopleMks[k], p.n);
+    }
+  } catch (e) {}
+}
+setInterval(pollPeople, 3000);
+
+// Pseudos uniques : un pseudo d’admin est réservé, un joueur ne peut pas le prendre
+const nameKey = n => n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+const nameUrl = key => DBU + "/pos/names/" + key + ".json";
+async function nameEntry(key) { return await (await fetch(nameUrl(key), { cache: "no-store" })).json(); }
+async function claimName(n) {
+  const key = nameKey(n);
+  if (!key) return "Utilise des lettres ou des chiffres.";
+  if (!DB) return "";
+  const cur = await nameEntry(key), now = Date.now(), adm = isAdmin();
+  if (cur && cur.p !== pid && (cur.a || now - cur.t < 43200000) && !(adm && !cur.a)) return cur.a ? "Pseudo déjà pris par un admin." : "Pseudo déjà pris.";
+  await fetch(nameUrl(key), { method: "PUT", body: JSON.stringify({ p: pid, t: now, a: adm ? 1 : 0 }) });
+  return "";
+}
+async function releaseName(exceptKey) {
+  if (!DB || !myNameKey || myNameKey === exceptKey) return;
+  try { const cur = await nameEntry(myNameKey); if (cur && cur.p === pid) await fetch(nameUrl(myNameKey), { method: "DELETE" }); } catch (e) {}
+}
+function applyPseudo() { setLabel(me, pseudo); }
+async function savePseudo() {
+  const n = $("pseudo").value.trim().slice(0, 16), msg = $("pseudoMsg");
+  msg.textContent = "Vérification…";
+  try {
+    if (n) { const err = await claimName(n); if (err) { msg.textContent = err; return; } }
+    const k = n ? nameKey(n) : "";
+    await releaseName(k);
+    pseudo = n; myNameKey = k;
+    try { localStorage.setItem("lg_pseudo", pseudo); localStorage.setItem("lg_nk", myNameKey); } catch (e) {}
+    applyPseudo();
+    msg.textContent = n ? "Pseudo enregistré ✓" : "Pseudo retiré.";
+    pushSelf();
+  } catch (e) { msg.textContent = "Impossible de vérifier : pas de connexion."; }
+}
+$("pseudoOk").onclick = savePseudo;
+$("pseudo").onkeydown = e => { if (e.key === "Enter") savePseudo(); };
+async function recheckName() {
+  if (!pseudo) return;
+  try {
+    const err = await claimName(pseudo);
+    if (err) {
+      pseudo = ""; myNameKey = ""; $("pseudo").value = "";
+      try { localStorage.removeItem("lg_pseudo"); localStorage.removeItem("lg_nk"); } catch (e) {}
+      applyPseudo(); toast("Ton pseudo est pris par quelqu’un d’autre : choisis-en un autre");
+    } else { myNameKey = nameKey(pseudo); try { localStorage.setItem("lg_nk", myNameKey); } catch (e) {} }
+  } catch (e) {}
+}
+setInterval(recheckName, 60000);
+setTimeout(recheckName, 3000);
+
+// Partage, vue complète, connexion et déconnexion
+$("shareChk").checked = shareOn;
+$("shareChk").onchange = e => {
+  shareOn = e.target.checked;
+  try { localStorage.setItem("lg_share", shareOn ? "1" : "0"); } catch (x) {}
+  if (!shareOn && role !== "terrain") dropSelf(); else pushSelf();
+  toast(shareOn ? "Ta position est partagée" : "Ta position n’est plus partagée");
+};
+$("aView").onchange = e => {
+  viewAll = e.target.checked;
+  try { localStorage.setItem("lg_view", viewAll ? "1" : "0"); } catch (x) {}
+  pollPeople();
+  toast(viewAll ? "Tu vois maintenant tout le monde" : "Vue complète désactivée");
+};
+function openVisitor() { $("vpanel").hidden = false; }
+$("vClose").onclick = () => { $("vpanel").hidden = true; };
+function logout() {
+  if (admin) exitAdmin();
+  role = null; consent = null;
+  try { sessionStorage.removeItem("lg_role"); sessionStorage.removeItem("lg_consent"); } catch (e) {}
+  $("panel").style.display = "none"; $("vpanel").hidden = true;
+  setAdminLabel(); clearPeople(); dropSelf(); lockPlayer(); recheckName();
+  toast("Tu es déconnecté");
+}
+$("logout").onclick = logout;
+$("vQuit").onclick = logout;
+$("menuBtn").onclick = () => {
+  if (placing) { endPlacing(); return; }
+  if ($("panel").style.display !== "block") { enterAdmin(); return; }
+  setFold(!$("panel").classList.contains("fold"));
+};
+function visStatus() {
+  const c = { t: 0, v: 0, j: 0, s: 0 };
+  for (const k in people) c[people[k].r || "j"]++;
+  let t = "Jaunes : " + c.t + " · Roses : " + c.v + " · Bleus : " + c.j + " · Gris : " + c.s;
+  if (visErr) t += ". Erreur : " + visErr;
+  return t;
+}
+function setAdminLabel() {
+  $("adminBtn").innerHTML = role === "visiteur" ? "Visiteur" : "Admin" + (role === "terrain" ? '<i class="dotY"></i>' : role === "virtuel" ? '<i class="dotP"></i>' : "") + (admin ? " ✓" : "");
+}
+$("pseudo").value = pseudo;
+applyPseudo();
+
+$("okQuick").onclick = () => $("ok").click();
+
+draw();
+if (fromLink) lockPlayer();
+if (DB) {
+  pull();
+  setInterval(pull, 5000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(); });
+}
+</script>
+</body>
+</html>
